@@ -1,0 +1,269 @@
+ls
+apt-get
+
+uname -r
+mkdir c3g
+ls
+cd c3g
+ls
+python3 -m venv venv
+. venv/bin/activate
+pip install flask
+pip install Flask
+ls
+nvim hello.py
+export FLASK_APP=hello
+flask run
+curl -i http://localhost:5000
+ls
+ls
+curl -i http://localhost:8000
+curl -i http://localhost:5000
+cd ../protected/
+ls
+cat >run-flask.sh <<NFSN_FELL_THE_POWER
+#!/bin/sh
+cd /home/public/c3g
+. venv/bin/activate
+export FLASK_APP=hello
+flask run
+NFSN_FELL_THE_POWER
+
+nvim run-flask.sh 
+ls
+cd ../public/c3g/
+ls
+cd ../../protected/
+chmod a+x run-flask.sh
+cd ../public/c3g/
+ls
+../../protected/run-flask.sh 
+ls
+nvim hello.py 
+ls
+cd c3g
+ls
+nvim hello.py 
+nvim hello.py 
+exit
+ls
+cd c3g
+ls
+nvim hello.py 
+exit
+mosh
+exit
+man bash
+git
+cd c3g
+ls
+cd ../../protected/run-flask.sh 
+nvim ../../protected/run-flask.sh 
+cd ..
+git clone https://www.github.com/COMP231-Winter2021-Section002-Team1/adaptive_quizlet.api
+ls
+cd adaptive_quizlet.api/
+ls
+cd ..
+mkdir prev
+cd c3g
+ls
+rm -rf ../prev/
+cp -r ../adaptive_quizlet.api/ .
+ls
+mv hello.py ..
+ls
+ls
+cd app
+ls
+nvim forms.py
+nvim models.py
+rm -rf app
+ls
+cd ..
+rm -rf app
+ls
+nvim database.db 
+rm database.db
+ls
+nvim main_blue_print.py 
+rm main_blue_print.py 
+rm README.md 
+touch README.md
+nvim requirements.txt 
+rm requirements.txt 
+nvim schema.sql 
+nvim static/
+nvim templates/
+ls
+nvim static
+nvim templates/
+cd templates/
+ls
+rm _formhelpers.html 
+nvim available_quizzes.html 
+nvim .
+nvim available_quizzes.html 
+rm available_quizzes.html 
+nvim base.html
+nvim create_quiz.html 
+rm create_quiz.html 
+nvim created_quizzes.html 
+rm created_quizzes.html 
+ls
+nvim index.html
+ls
+rm -rf qu*
+ls
+rm search_quizzes.html 
+nvim signin.html 
+nvim signup.html 
+nvim user_profile.html 
+rm user_profile.html 
+ls
+ls
+..
+ls
+cd ..
+ls
+postgresql
+sudo pkg update
+pkg update
+sqlite
+postgres
+su - postgres
+psql
+sudo sysrc 
+doas
+psql
+sudo su - postgres
+psql -c "alter user postgres with password 'hi'"
+cd ..
+ls -la
+c d-
+cd -
+history
+ls
+cd ..
+ls
+cd ..
+ls
+cd private/
+ls
+mv ../public/adaptive_quizlet.api/ ../public/hello.py .
+ls
+cd -
+cd public/
+ls
+cd c3g
+ls
+cd templates/
+ls
+cd ..
+ls
+cd /home/protected/
+history > term_hist
+nvim term_hist 
+cd ../public/c3g/
+ls
+cd ~
+cd -
+bash
+ls
+cd ../private/
+ls
+cd ../protected/
+ls
+mv term_hist ../private/
+cd ~
+mkdir opt
+mkdir opt/postgresql
+mkdir downloads
+mkdir downloads/postgresql
+cd downloads/postgresql/
+wget
+wget https://ftp.postgresql.org/pub/source/v13.4/postgresql-13.4.tar.gz
+tar -xzf postgresql-13.4.tar.gz 
+cd postgresql-13.4
+ls
+./configure --prefix=/home/private/opt/postgresql/ --with-perl --with-python --with-tcl --with-gssapi --with-openssl --with-pam --with-uuid=bsd
+./configure --prefix=/home/private/opt/postgresql/ --with-perl --with-tcl --with-gssapi --with-openssl --with-pam --with-uuid=bsd
+gmake world
+gmake check
+gmake install-world
+cd ~
+echo $SHELL
+nvim .bash_profile
+source .bash_profile 
+whoami
+mkdir /home/private/opt/postgresql/data
+initdb -A md5 -D UTF-8 --locale=en_US.UTF-8 -W -D /home/private/opt/postgresql/data/
+touch /home/private/opt/postgresql/logfile
+pg_ctl -D /home/private/opt/postgresql/data -l /home/private/opt/postgresql/logfile start
+createdb postgres
+psql
+psql -U postgres
+psql -U postgres
+
+psql
+psql
+psql -U postgres
+psql -U postgres
+exit
+psql
+pg_ctl -D /home/private/opt/postgresql/data -l /home/private/opt/postgresql/logfile start
+nvim /home/private/opt/postgresql/logfile 
+psql
+/home/private/opt/postgresql/bin/dropdb c3g
+/home/private/opt/postgresql/bin/dropuser postgres
+adduser postgres
+createdb test
+psql test
+psql postgres
+dropdb test
+psql postgres
+pg_ctl stop -D /home/private/opt/postgresql/data/
+echo "pg_ctl -D /home/private/opt/postgresql/data -l /home/private/opt/postgresql/logfile start" > ../protected/run-postgres.sh
+nvim ../protected/run-postgres.sh 
+chmod u+x ../protected/run-postgres.sh 
+nvim ../protected/run-postgres.sh 
+psql -h c3g.local
+pg_ctl -D /home/private/opt/postgresql/data -l /home/private/opt/postgresql/logfile start
+pg_ctl -D /home/private/opt/postgresql/data/ stop
+cd ../protected/
+./run-postgres.sh 
+pg_ctl -D /home/private/opt/postgresql/data/ stop
+./run-postgres.sh 
+psql
+psql postgres
+nvim run-postgres.sh 
+pg_ctl -D /home/private/opt/postgresql/data/ stop
+./run-postgres.sh 
+./run-postgres.sh 
+./run-postgres.sh 
+psql --help
+./run-postgres.sh 
+psql postgres
+psql
+pg_ctl -D /home/private/opt/postgresql/data/ start
+./run-postgres.sh 
+./run-postgres.sh 
+pg_ctl -D /home/private/opt/postgresql/data/ stop
+./run-postgres.sh 
+./run-postgres.sh 
+./run-postgres.sh 
+./run-postgres.sh 
+psql -h c3g.local
+psql -h localhost
+nvim /home/private/opt/postgresql/data/pg_hba.conf 
+psql -h localhost -U postgres -d postgres
+psql -h localhost -U c3g -d postgres
+psql -h localhost
+nvim /home/private/opt/postgresql/data/pg_hba.conf 
+nvim /home/private/opt/postgresql/data/pg_hba.conf 
+psql -h localhost
+psql -h localhost -U c3g -d postgres
+nvim /home/private/opt/postgresql/data/pg_hba.conf 
+psql -h localhost -U c3g -d postgres
+nvim /home/private/opt/postgresql/data/pg_hba.conf 
+psql -h localhost -U c3g -d postgres

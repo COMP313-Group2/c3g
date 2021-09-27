@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Sign Up{% endblock %}
+
+{% block head %}
+  {{ super() }}
+{% endblock %}
+
+{% block content %}
+<br>
+  <h1 class="text-center">Sign Up</h1>
+  <form class="container justify-content-md-center" action="/signup" method="post">
+    <div class="row justify-content-md-center">
+      <div class="col-lg-4"> 
+        <div class="form-group">
+          <label for="name">Name:</label>
+          <input type="text" id="name" class="form-control" name="name" required pattern="(\w| )+"><br><br>
+        </div>
+        <div class="form-group">
+          <label for="email">Email:</label>
+          <input type="email" id="email" class="form-control" name="email" required pattern=".+@.+\..+"><br><br>
+        </div>
+        <div class="form-group">
+          <label for="password">Password:</label>
+          <input type="password" id="password" class="form-control" name="password" required pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}"><br><br>
+        </div>
+        <div class="text-center">
+          <button type="submit" class="btn btn-success">SIGN UP</button>
+        </div>
+      </div>
+    </div>
+  </form> 
+{% endblock %}
+
+{% block footer %}
+  {{ super() }}
+  <!-- <p>This is the footer from the index child template</p> -->
+{% endblock %}
