@@ -4,12 +4,12 @@
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>Unity WebGL Player | Space Pong</title>
-		<link rel="shortcut icon" href="{{url_for('static', filename='space-pong/TemplateData/favicon.ico'}}">
-		<link rel="stylesheet" href="{{url_for('static', filename='space-pong/TemplateData/style.css'}}">
-		<script src="{{url_for('static', filename='space-pong/TemplateData/UnityProgress.js'}}"></script>  
-		<script src="{{url_for('static', filename='space-pong/Build/UnityLoader.js'}}"></script>
+		<link rel="shortcut icon" href="{{url_for('static', filename='space-pong/TemplateData/favicon.ico')}}">
+		<link rel="stylesheet" href="{{url_for('static', filename='space-pong/TemplateData/style.css')}}">
+		<script src="{{url_for('static', filename='space-pong/TemplateData/UnityProgress.js')}}"></script>  
+		<script src="{{url_for('static', filename='space-pong/Build/UnityLoader.js')}}"></script>
     <script>
-      var gameInstance = UnityLoader.instantiate("gameContainer", "Build/Space Pong.json", {onProgress: UnityProgress});
+			var gameInstance = UnityLoader.instantiate("gameContainer", "{{url_for('static', filename='space-pong/Build/Space Pong.json')}}", {onProgress: UnityProgress});
     </script>
   </head>
   <body>
