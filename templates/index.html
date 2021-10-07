@@ -1,25 +1,61 @@
-<!DOCTYPE html>
-<html lang="en-us">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Unity WebGL Player | Space Pong</title>
-		<link rel="shortcut icon" href="{{url_for('static', filename='space-pong/TemplateData/favicon.ico')}}">
-		<link rel="stylesheet" href="{{url_for('static', filename='space-pong/TemplateData/style.css')}}">
-		<script src="{{url_for('static', filename='space-pong/TemplateData/UnityProgress.js')}}"></script>  
-		<script src="{{url_for('static', filename='space-pong/Build/UnityLoader.js')}}"></script>
-    <script>
-			var gameInstance = UnityLoader.instantiate("gameContainer", "{{url_for('static', filename='space-pong/Build/Space Pong.json')}}", {onProgress: UnityProgress});
-    </script>
-  </head>
-  <body>
-    <div class="webgl-content">
-      <div id="gameContainer" style="width: 640px; height: 360px"></div>
-      <div class="footer">
-        <div class="webgl-logo"></div>
-        <div class="fullscreen" onclick="gameInstance.SetFullscreen(1)"></div>
-        <div class="title">Space Pong</div>
+{% extends "base.html" %}
+
+{% block title %}Index{% endblock %}
+
+{% block head %}
+  {{ super() }}
+  <style>
+    .important { color: #336699; }
+    .card-body { margin-top: 100px;}
+    .alert {list-style: none; width: 250px; text-align: center; margin: 10px auto 0px auto;}
+  </style>
+{% endblock %}
+
+<!-- content should be center -->
+{% block content %}
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <ul class=flashes>
+      {% for category, message in messages %}
+      <div class="text-center">
+        <div class="alert alert-warning" role="alert">
+          <li class="text-center {{ category }}">{{ message }}</li>
+        </div>  
+      </div>
+      {% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
+
+  <div class="card  w-50 mb-3 border-0" style="width: 18rem; margin: auto;">
+    <div class="card-body">
+      <h2 class="card-title text-center">Welcome to C3G games!</h2>
+      <p class="card-text">The following games are available:
+			<ul>
+				<li> <a href="/space_pong">Space Pong</a> </li>
+				<li> <a href="/blade_runner">Blade Runner</a> </li>
+				<li> <a href="/excaliburs_quest">Excalibur's Quest</a> </li>
+				<li> <a href="/potato_tomato">Potato Tomato</a> </li>
+			</ul>
+			You may also upload your own games after signing up.
+			</p>
+
+      <div class="text-center">
+          {% if 'user' in session and session['user'] %}
+          <a href="logout" class="btn btn-warning">Logout</a>
+          {% else %}
+          <a href="signin" class="btn btn-primary">Sign In</a>
+          <a href="signup" class="btn btn-success">Sign Up</a>
+
+          {{user}}
+          {% endif %}
+
       </div>
     </div>
-  </body>
-</html>
+  </div>
+{% endblock %}
+
+{% block footer %}
+  {{ super() }}
+  <!-- <p>This is the footer from the index child template</p> -->
+{% endblock %}

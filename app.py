@@ -3,9 +3,27 @@ from flask import Flask, render_template
 app = Flask(__name__)
 
 @app.route("/")
-def hello_world():
-    #return render_template('space-pong/index.html')
+def home():
     return render_template('index.html')
+
+@app.route("/space_pong")
+def space_pong():
+    return render_template('space_pong/index.html')
+
+@app.route("/blade_runner")
+def blade_runner():
+    return render_template('blade_runner/index.html')
+
+@app.route("/excaliburs_quest")
+def excaliburs_quest():
+    return render_template('excaliburs_quest/index.html')
+
+@app.route("/potato_tomato")
+def potato_tomato():
+    return render_template('potato_tomato/index.html')
+
+##################################################
+# WebGL test
 
 #    return """
 #    <!doctype html>
