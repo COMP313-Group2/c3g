@@ -29,16 +29,21 @@
 
   <div class="card w-50 mb-3 border-0" style="width: 18rem; margin: auto;">
     <div class="card-body">
-      <h2 class="card-title text-center">Welcome to C3G games!</h2>
+      {% if 'user' in session and session['user'] %}
+			  <h2 class="card-title text-center">Welcome to Titan games {{session['user'].name}}!</h2>
+			{% else %}
+			  <h2 class="card-title text-center">Welcome to Titan games!</h2>
+      {% endif %}
       <p class="card-text">The following games are available:
-			<ul>
-				<li> <a href="/space_pong">Space Pong</a> </li>
-				<li> <a href="/blade_runner">Blade Runner</a> </li>
-				<li> <a href="/excaliburs_quest">Excalibur's Quest</a> </li>
-				<li> <a href="/potato_tomato">Potato Tomato</a> </li>
-			</ul>
-			{{users}}
-			You may also upload your own games after signing up.
+				<ul>
+					<li> <a href="/space_pong">Space Pong</a> </li>
+					<li> <a href="/blade_runner">Blade Runner</a> </li>
+					<li> <a href="/excaliburs_quest">Excalibur's Quest</a> </li>
+					<li> <a href="/potato_tomato">Potato Tomato</a> </li>
+				</ul>
+				Here are the list of users of this website: {{users}}.
+				<br>
+				You may also upload your own games after signing up.
 			</p>
 
       <div class="text-center">

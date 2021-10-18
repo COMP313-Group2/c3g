@@ -1,10 +1,17 @@
 # Flask web framework
-from flask import Flask, render_template, g
-# Database
-import sqlite3
-# from app import create_app
+from flask import Flask, render_template, g, request, redirect, session, flash, send_file
+from werkzeug.utils import secure_filename
+from markupsafe import escape
+
+import sqlite3 # Database
+import re # Regular Expressions
+import shutil # File operations
+import fileinput
+import sys
 
 app = Flask(__name__)
+app.secret_key = b'148c8959c6ba9202c4d6a018d90554f53023a862f9e7ce136a6e30a6700e753c'
+
 
 
 ################################################################################
@@ -52,7 +59,7 @@ def init_db():
         db.commit()
 
 
-init_db()
+# init_db()
 
 
 
@@ -60,17 +67,113 @@ init_db()
 # Routes
 
 @app.route("/")
-def home():
+def home_page():
     users = query_db('SELECT * FROM user')
     return render_template('index.html', users=users)
 
+
+# Validate data format is correct
+def validate(text, pattern):
+    regex = re.compile(pattern, re.I)
+    match = regex.match(request.form[text])
+    return bool(match)
+
+
+# Show signup form and process and save returned form data
+@app.route('/signup', methods=['GET', 'POST'])
+def signup_page():
+    if request.method == 'GET':
+        return render_template('signup.html')
+
+    elif request.method == 'POST':
+        if (validate('name', '(\w| )+')
+            and validate('email', '.+\@.+\..+')
+            and validate('password', '(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}')
+            ):
+            db = get_db()
+            db.execute('INSERT INTO user (name, email, password) VALUES (?, ?, ?)',
+                       tuple([request.form[val] for val in ['name', 'email', 'password']]))
+            db.commit()
+            flash('You have successfully signed up!')
+            return redirect('/')
+        else:
+            flash('Invalid info has been sent to Flask')
+            return redirect('/')
+
+
+# Show signin form and return user if found
+@app.route('/signin', methods=['GET', 'POST'])
+def signin_page():
+    if request.method == 'GET':
+        return render_template('signin.html')
+
+    elif request.method == 'POST':
+        if (validate('email', '.+\@.+\..+')
+            and validate('password', '(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}')
+            ):
+            user = query_db('SELECT * FROM user WHERE email = ? AND password = ?',
+                            (request.form['email'], request.form['password']), one=True)
+            if user is None:
+                flash('User does not exist')
+                return redirect('/')
+            else:
+                session['user'] = user
+                flash('You were successfully logged in')
+                return redirect('/')
+        else:
+            flash('Invalid info has been sent to Flask')
+            return redirect('/')
+
+
+@app.route('/logout')
+def logout_page():
+    session.pop('user', None)
+    flash('You have successfully logged out')
+    return redirect('/')
+
+def replace(file, previousw, nextw):
+   for line in fileinput.input(file, inplace=1):
+       line = line.replace(previousw, nextw)
+       sys.stdout.write(line)
+
+
+@app.route('/user', methods=['GET', 'POST'])
+def user_page():
+    if request.method == 'GET':
+        return render_template('user.html')
+    elif request.method == 'POST':
+        f = request.files['file']
+
+        # f.filename = Blade Runner.zip
+        # filename_snake = blade_runner.zip
+        # folder = Blade Runner
+        # folder_snake = blade_runner
+        filename_snake = re.sub('\s', '_', secure_filename(f.filename.lower()))
+        folder = re.sub('_', ' ', re.sub('.zip', '', secure_filename(f.filename)))
+        folder_snake = re.sub('.zip', '', filename_snake)
+        base = "/home/hassan/repo/c3g/static/"
+
+        f.save(f"{base}{filename_snake}")
+        shutil.unpack_archive(f"{base}{filename_snake}", f"{base}")
+        shutil.rmtree(f"{base}{filename_snake}")
+        session['user'] = user
+        shutil.move(f"{base}{folder}", f"{base}game/{session['user'].id}/{folder_snake}")
+
+        replace(f"{base}game/{session['user'].id}/{folder_snake}/index.html", 
+                'TemplateData', 
+                f'static/{folder_snake}/TemplateData')
+        replace(f"{base}game/{session['user'].id}/{folder_snake}/index.html", 
+                'Build', 
+                f'static/{folder_snake}/Build')
+
+        flash('You have successfully added a game!')
+        return render_template('user.html')
+
+
+# Games (Built-in)
 @app.route("/space_pong")
 def space_pong():
     return render_template('space_pong/index.html')
-
-@app.route("/blade_runner")
-def blade_runner():
-    return render_template('blade_runner/index.html')
 
 @app.route("/excaliburs_quest")
 def excaliburs_quest():
@@ -80,7 +183,14 @@ def excaliburs_quest():
 def potato_tomato():
     return render_template('potato_tomato/index.html')
 
+# Dynamically added Games
+@app.route("/blade_runner")
+def blade_runner2():
+    return send_file('static/blade_runner/index.html')
 
+# @app.route("/game/<int:game_id>")
+# def game_page(game_id):
+#     return send_file(f'static/game/{game_id}/blade_runner/index.html')
 
 
 

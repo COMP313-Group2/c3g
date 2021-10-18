@@ -1,6 +1,5 @@
 -- SQLite3 db
 DROP TABLE IF EXISTS user;
-DROP TABLE IF EXISTS quiz;
 
 CREATE TABLE user (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -10,4 +9,4 @@ CREATE TABLE user (
 );
 
 -- Initialize data in db with example data
-INSERT INTO user VALUES (0, "hassan", "hassan149367@gmail.com", "password");
+-- INSERT INTO user VALUES (0, "hassan", "hassan149367@gmail.com", "password");

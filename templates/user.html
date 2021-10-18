@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Index{% endblock %}
+
+{% block head %}
+  {{ super() }}
+  <style>
+    .important { color: #336699; }
+    .card-body { margin-top: 100px;}
+    .alert {list-style: none; width: 250px; text-align: center; margin: 10px auto 0px auto;}
+  </style>
+{% endblock %}
+
+<!-- content should be center -->
+{% block content %}
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <ul class=flashes>
+      {% for category, message in messages %}
+      <div class="text-center">
+        <div class="alert alert-warning" role="alert">
+          <li class="text-center {{ category }}">{{ message }}</li>
+        </div>  
+      </div>
+      {% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
+
+  <div class="card w-50 mb-3 border-0" style="width: 18rem; margin: auto;">
+    <div class="card-body">
+			<h1>Upload your WebGL Unity zip file</h1>
+			<p>Enter the game name as game_name</p>
+			<form method="post" action="/user" enctype="multipart/form-data">
+				<input type="file" id="file" name="file">
+				<input type="submit" value="Submit">
+			</form>
+    </div>
+  </div>
+{% endblock %}
+
+{% block footer %}
+  {{ super() }}
+  <!-- <p>This is the footer from the index child template</p> -->
+{% endblock %}
