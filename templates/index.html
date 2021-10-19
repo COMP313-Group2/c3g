@@ -34,15 +34,21 @@
 			{% else %}
 			  <h2 class="card-title text-center">Welcome to Titan games!</h2>
       {% endif %}
-      <p class="card-text">The following games are available:
+			<p class="card-text">The following games are available:<br>
+				Built-in games:
 				<ul>
 					<li> <a href="/space_pong">Space Pong</a> </li>
-					<li> <a href="/blade_runner">Blade Runner</a> </li>
 					<li> <a href="/excaliburs_quest">Excalibur's Quest</a> </li>
 					<li> <a href="/potato_tomato">Potato Tomato</a> </li>
 				</ul>
-				Here are the list of users of this website: {{users}}.
-				<br>
+				Dynamically added games:
+				<ul>
+					{% for game in games %}
+					<li> <a href="/game/{{game['id']}}">{{game['name']}}</a> </li>
+					{% endfor %}
+				</ul>
+				Users: {{users}}.  <br> <br>
+				Games: {{games}}.  <br> <br>
 				You may also upload your own games after signing up.
 			</p>
 
@@ -50,8 +56,8 @@
           {% if 'user' in session and session['user'] %}
           <a href="logout" class="btn btn-warning">Logout</a>
           {% else %}
-          <a href="signin" class="btn btn-primary">Sign In</a>
           <a href="signup" class="btn btn-success">Sign Up</a>
+          <a href="signin" class="btn btn-primary">Sign In</a>
 
           {{user}}
           {% endif %}

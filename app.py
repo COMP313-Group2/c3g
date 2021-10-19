@@ -6,10 +6,11 @@ from markupsafe import escape
 import sqlite3 # Database
 import re # Regular Expressions
 import shutil # File operations
+import os
 import fileinput
 import sys
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='')
 app.secret_key = b'148c8959c6ba9202c4d6a018d90554f53023a862f9e7ce136a6e30a6700e753c'
 
 
@@ -59,7 +60,7 @@ def init_db():
         db.commit()
 
 
-# init_db()
+init_db()
 
 
 
@@ -68,8 +69,9 @@ def init_db():
 
 @app.route("/")
 def home_page():
-    users = query_db('SELECT * FROM user')
-    return render_template('index.html', users=users)
+    users = query_db('SELECT * FROM users')
+    games = query_db('SELECT * FROM games')
+    return render_template('index.html', users=users, games=games)
 
 
 # Validate data format is correct
@@ -91,7 +93,7 @@ def signup_page():
             and validate('password', '(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}')
             ):
             db = get_db()
-            db.execute('INSERT INTO user (name, email, password) VALUES (?, ?, ?)',
+            db.execute('INSERT INTO users (name, email, password) VALUES (?, ?, ?)',
                        tuple([request.form[val] for val in ['name', 'email', 'password']]))
             db.commit()
             flash('You have successfully signed up!')
@@ -111,7 +113,7 @@ def signin_page():
         if (validate('email', '.+\@.+\..+')
             and validate('password', '(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}')
             ):
-            user = query_db('SELECT * FROM user WHERE email = ? AND password = ?',
+            user = query_db('SELECT * FROM users WHERE email = ? AND password = ?',
                             (request.form['email'], request.form['password']), one=True)
             if user is None:
                 flash('User does not exist')
@@ -139,35 +141,47 @@ def replace(file, previousw, nextw):
 
 @app.route('/user', methods=['GET', 'POST'])
 def user_page():
-    if request.method == 'GET':
-        return render_template('user.html')
-    elif request.method == 'POST':
-        f = request.files['file']
+    if 'user' in session and session['user']:
+        if request.method == 'GET':
+            return render_template('user.html')
+        elif request.method == 'POST':
+            f = request.files['file']
 
-        # f.filename = Blade Runner.zip
-        # filename_snake = blade_runner.zip
-        # folder = Blade Runner
-        # folder_snake = blade_runner
-        filename_snake = re.sub('\s', '_', secure_filename(f.filename.lower()))
-        folder = re.sub('_', ' ', re.sub('.zip', '', secure_filename(f.filename)))
-        folder_snake = re.sub('.zip', '', filename_snake)
-        base = "/home/hassan/repo/c3g/static/"
+            # f.filename = Blade Runner.zip
+            # filename_snake = blade_runner.zip
+            # folder = Blade Runner
+            # folder_snake = blade_runner
 
-        f.save(f"{base}{filename_snake}")
-        shutil.unpack_archive(f"{base}{filename_snake}", f"{base}")
-        shutil.rmtree(f"{base}{filename_snake}")
-        session['user'] = user
-        shutil.move(f"{base}{folder}", f"{base}game/{session['user'].id}/{folder_snake}")
+            # filename_snake = re.sub('\s', '_', secure_filename(f.filename.lower()))
+            # folder = re.sub('_', ' ', re.sub('.zip', '', secure_filename(f.filename)))
+            # folder_snake = re.sub('.zip', '', filename_snake) # TODO remove
+            base = "/home/hassan/repo/c3g/static/"
+            game_id = query_db('SELECT ifnull(max(id), 0) FROM games;')[0]['ifnull(max(id), 0)'] + 1
 
-        replace(f"{base}game/{session['user'].id}/{folder_snake}/index.html", 
-                'TemplateData', 
-                f'static/{folder_snake}/TemplateData')
-        replace(f"{base}game/{session['user'].id}/{folder_snake}/index.html", 
-                'Build', 
-                f'static/{folder_snake}/Build')
+            f.save(f"{base}{f.filename}")
+            shutil.unpack_archive(f"{base}{f.filename}", f"{base}")
+            os.remove(f"{base}{f.filename}")
+            shutil.move(f"{base}{re.sub('.zip', '', f.filename)}", f"{base}game/{game_id}")
 
-        flash('You have successfully added a game!')
-        return render_template('user.html')
+            replace(f"{base}game/{game_id}/index.html", 
+                    'TemplateData', 
+                    # f'static/game/{game_id}/TemplateData')
+                    f'{game_id}/TemplateData')
+            replace(f"{base}game/{game_id}/index.html", 
+                    'Build', 
+                    # f'static/game/{game_id}/Build')
+                    f'{game_id}/Build')
+
+            db = get_db()
+            db.execute('INSERT INTO games (id, userId, name) VALUES (?, ?, ?)', 
+                    (game_id, session['user']['id'], re.sub('.zip', '', f.filename)))
+            db.commit()
+
+            flash('You have successfully added a game!')
+            return render_template('user.html')
+    else:
+        flash('You are not authorized to access this page')
+        return render_template('index.html')
 
 
 # Games (Built-in)
@@ -183,14 +197,15 @@ def excaliburs_quest():
 def potato_tomato():
     return render_template('potato_tomato/index.html')
 
-# Dynamically added Games
-@app.route("/blade_runner")
-def blade_runner2():
-    return send_file('static/blade_runner/index.html')
+# # Dynamically added Games
+# @app.route("/blade_runner")
+# def blade_runner2():
+#     return send_file('static/game/1/index.html')
 
-# @app.route("/game/<int:game_id>")
-# def game_page(game_id):
-#     return send_file(f'static/game/{game_id}/blade_runner/index.html')
+@app.route("/game/<int:game_id>")
+def game_page(game_id):
+    # return send_file(f'static/game/{game_id}/index.html')
+    return send_file(f'static/game/{game_id}/index.html')
 
 
 
