@@ -30,23 +30,25 @@
   <div class="card w-50 mb-3 border-0" style="width: 18rem; margin: auto;">
     <div class="card-body">
       {% if 'user' in session and session['user'] %}
-			  <h2 class="card-title text-center">Welcome to Titan games {{session['user'].name}}!</h2>
+			  <h2 class="card-title text-center">Welcome to Titan games {{session['user']['userName']}}!</h2>
 			{% else %}
 			  <h2 class="card-title text-center">Welcome to Titan games!</h2>
       {% endif %}
 			<p class="card-text">The following games are available:<br>
-				Built-in games:
+				<!-- Built-in games: -->
+				<!-- <ul> -->
+				<!-- 	<li> <a href="/space_pong">Space Pong</a> </li> -->
+				<!-- 	<li> <a href="/excaliburs_quest">Excalibur's Quest</a> </li> -->
+				<!-- 	<li> <a href="/potato_tomato">Potato Tomato</a> </li> -->
+				<!-- </ul> -->
+
+				<!-- Dynamically added games: -->
 				<ul>
-					<li> <a href="/space_pong">Space Pong</a> </li>
-					<li> <a href="/excaliburs_quest">Excalibur's Quest</a> </li>
-					<li> <a href="/potato_tomato">Potato Tomato</a> </li>
-				</ul>
-				Dynamically added games:
-				<ul>
-					{% for game in games %}
-					<li> <a href="/game/{{game['id']}}">{{game['name']}}</a> </li>
+					{% for item in query %}
+					<li> <a href="/game/{{item['gameId']}}">{{item['gameName']}}</a> By: {{item['userName']}} </li>
 					{% endfor %}
 				</ul>
+				Query (<em>SELECT * FROM games INNER JOIN users ON games.userId=users.userId</em>): {{query}}.  <br> <br>
 				Users: {{users}}.  <br> <br>
 				Games: {{games}}.  <br> <br>
 				You may also upload your own games after signing up.

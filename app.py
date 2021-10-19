@@ -60,7 +60,7 @@ def init_db():
         db.commit()
 
 
-init_db()
+# init_db()
 
 
 
@@ -71,7 +71,8 @@ init_db()
 def home_page():
     users = query_db('SELECT * FROM users')
     games = query_db('SELECT * FROM games')
-    return render_template('index.html', users=users, games=games)
+    query = query_db('SELECT * FROM games INNER JOIN users ON games.userId=users.userId')
+    return render_template('index.html', users=users, games=games, query=query)
 
 
 # Validate data format is correct
@@ -93,7 +94,7 @@ def signup_page():
             and validate('password', '(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}')
             ):
             db = get_db()
-            db.execute('INSERT INTO users (name, email, password) VALUES (?, ?, ?)',
+            db.execute('INSERT INTO users (userName, email, password) VALUES (?, ?, ?)',
                        tuple([request.form[val] for val in ['name', 'email', 'password']]))
             db.commit()
             flash('You have successfully signed up!')
@@ -156,25 +157,55 @@ def user_page():
             # folder = re.sub('_', ' ', re.sub('.zip', '', secure_filename(f.filename)))
             # folder_snake = re.sub('.zip', '', filename_snake) # TODO remove
             base = "/home/hassan/repo/c3g/static/"
-            game_id = query_db('SELECT ifnull(max(id), 0) FROM games;')[0]['ifnull(max(id), 0)'] + 1
+            game_id = query_db('SELECT ifnull(max(userId), 0) FROM games;')[0]['ifnull(max(userId), 0)'] + 1
 
             f.save(f"{base}{f.filename}")
             shutil.unpack_archive(f"{base}{f.filename}", f"{base}")
             os.remove(f"{base}{f.filename}")
             shutil.move(f"{base}{re.sub('.zip', '', f.filename)}", f"{base}game/{game_id}")
 
+            # replace(f"{base}game/{game_id}/index.html", 
+            #         'TemplateData', 
+            #         # f'static/game/{game_id}/TemplateData')
+            #         f'{game_id}/TemplateData')
+
+            # replace(f"{base}game/{game_id}/index.html", 
+            #         'Build', 
+            #         # f'static/game/{game_id}/Build')
+            #         f'{game_id}/Build')
+
             replace(f"{base}game/{game_id}/index.html", 
-                    'TemplateData', 
-                    # f'static/game/{game_id}/TemplateData')
-                    f'{game_id}/TemplateData')
+                    '<link rel="shortcut icon" href="TemplateData/favicon.ico">',
+                    f'<link rel="shortcut icon" href="{game_id}/TemplateData/favicon.ico">')
+
             replace(f"{base}game/{game_id}/index.html", 
-                    'Build', 
-                    # f'static/game/{game_id}/Build')
-                    f'{game_id}/Build')
+                    '<link rel="stylesheet" href="TemplateData/style.css">',
+                    f'<link rel="stylesheet" href="{game_id}/TemplateData/style.css">')
+
+            replace(f"{base}game/{game_id}/index.html", 
+                    '<script src="TemplateData/UnityProgress.js"></script>',
+                    f'<script src="{game_id}/TemplateData/UnityProgress.js"></script>')
+
+            replace(f"{base}game/{game_id}/index.html", 
+                    '<script src="Build/UnityLoader.js"></script>',
+                    f'<script src="{game_id}/Build/UnityLoader.js"></script>')
+
+            replace(f"{base}game/{game_id}/index.html", 
+                    'var gameInstance = UnityLoader.instantiate("gameContainer", "Build/',
+                    f'var gameInstance = UnityLoader.instantiate("gameContainer", "{game_id}/Build/')
+
+            replace(f"{base}game/{game_id}/index.html", 
+                    'var unityInstance = UnityLoader.instantiate("unityContainer", "Build',
+                    f'var unityInstance = UnityLoader.instantiate("unityContainer", "{game_id}/Build')
+
+            replace(f"{base}game/{game_id}/index.html", 
+                    'var buildUrl = "Build";',
+                    f'var buildUrl = "{game_id}/Build";')
+
 
             db = get_db()
-            db.execute('INSERT INTO games (id, userId, name) VALUES (?, ?, ?)', 
-                    (game_id, session['user']['id'], re.sub('.zip', '', f.filename)))
+            db.execute('INSERT INTO games (gameId, userId, gameName) VALUES (?, ?, ?)', 
+                    (game_id, session['user']['userId'], re.sub('.zip', '', f.filename)))
             db.commit()
 
             flash('You have successfully added a game!')
