@@ -17,16 +17,16 @@ CREATE TABLE games (
 );
 
 -- Initialize data in db with example data
-INSERT INTO users (userName, email, password) 
-	VALUES ("hassan", "hassan149367@gmail.com", "Password0!");
-INSERT INTO games (userId, gameName) 
-	VALUES (1, "Blade Runner");
-INSERT INTO games (userId, gameName) 
-	VALUES (1, "Excalibur's Quest");
-
-
-INSERT INTO users (userName, email, password) 
-	VALUES ("sarmad", "sarmad@gmail.com", "Password0!");
-INSERT INTO games (userId, gameName) 
-	VALUES (2, "Space Pong");
+--INSERT INTO users (userName, email, password) 
+	--VALUES ("hassan", "hassan149367@gmail.com", "Password0!");
+--INSERT INTO games (userId, gameName) 
+	--VALUES (1, "Blade Runner");
+--INSERT INTO games (userId, gameName) 
+	--VALUES (1, "Excalibur's Quest");
+--
+--
+--INSERT INTO users (userName, email, password) 
+	--VALUES ("sarmad", "sarmad@gmail.com", "Password0!");
+--INSERT INTO games (userId, gameName) 
+	--VALUES (2, "Space Pong");
 

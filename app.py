@@ -60,7 +60,7 @@ def init_db():
         db.commit()
 
 
-# init_db()
+init_db()
 
 
 
@@ -156,7 +156,8 @@ def user_page():
             # filename_snake = re.sub('\s', '_', secure_filename(f.filename.lower()))
             # folder = re.sub('_', ' ', re.sub('.zip', '', secure_filename(f.filename)))
             # folder_snake = re.sub('.zip', '', filename_snake) # TODO remove
-            base = "/home/hassan/repo/c3g/static/"
+            # base = "/home/hassan/repo/c3g/static/"
+            base = "/home/public/c3g/static/"
             game_id = query_db('SELECT ifnull(max(userId), 0) FROM games;')[0]['ifnull(max(userId), 0)'] + 1
 
             f.save(f"{base}{f.filename}")
