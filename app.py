@@ -60,7 +60,7 @@ def init_db():
         db.commit()
 
 
-init_db()
+# init_db()
 
 
 
@@ -156,8 +156,11 @@ def user_page():
             # filename_snake = re.sub('\s', '_', secure_filename(f.filename.lower()))
             # folder = re.sub('_', ' ', re.sub('.zip', '', secure_filename(f.filename)))
             # folder_snake = re.sub('.zip', '', filename_snake) # TODO remove
+
+            # NOTE: change base when switching between local and remote development
             # base = "/home/hassan/repo/c3g/static/"
             base = "/home/public/c3g/static/"
+
             game_id = query_db('SELECT ifnull(max(userId), 0) FROM games;')[0]['ifnull(max(userId), 0)'] + 1
 
             f.save(f"{base}{f.filename}")
@@ -217,17 +220,17 @@ def user_page():
 
 
 # Games (Built-in)
-@app.route("/space_pong")
-def space_pong():
-    return render_template('space_pong/index.html')
+# @app.route("/space_pong")
+# def space_pong():
+#     return render_template('space_pong/index.html')
 
-@app.route("/excaliburs_quest")
-def excaliburs_quest():
-    return render_template('excaliburs_quest/index.html')
+# @app.route("/excaliburs_quest")
+# def excaliburs_quest():
+#     return render_template('excaliburs_quest/index.html')
 
-@app.route("/potato_tomato")
-def potato_tomato():
-    return render_template('potato_tomato/index.html')
+# @app.route("/potato_tomato")
+# def potato_tomato():
+#     return render_template('potato_tomato/index.html')
 
 # # Dynamically added Games
 # @app.route("/blade_runner")
@@ -236,77 +239,9 @@ def potato_tomato():
 
 @app.route("/game/<int:game_id>")
 def game_page(game_id):
-    # return send_file(f'static/game/{game_id}/index.html')
     return send_file(f'static/game/{game_id}/index.html')
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-##################################################
-# WebGL test
-
-#    return """
-#    <!doctype html>
-#    <html>
-#      <head>
-#        <meta charset="utf-8">
-#        <meta http-equiv="X-UA-Compatible" content="chrome=1" />
-#        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"></meta>
-#        <style>
-#            body {
-#              text-align : center;
-#            }
-#            button {
-#              display : block;
-#              font-size : inherit;
-#              margin : auto;
-#              padding : 0.6em;
-#            }
-#        </style>
-#      </head>
-#    <body>
-#        <p>[ Will detect WebGL after button press (below)]</p>
-#        <button>Press here to detect WebGLRenderingContext</button>
-#        <script type="text/javascript">
-#            // Run everything inside window load event handler, to make sure
-#            // DOM is fully loaded and styled before trying to manipulate it.
-#            window.addEventListener("load", function() {
-#              var paragraph = document.querySelector("p"),
-#                button = document.querySelector("button");
-#              // Adding click event handler to button.
-#              button.addEventListener("click", detectWebGLContext, false);
-#              function detectWebGLContext () {
-#                // Create canvas element. The canvas is not added to the
-#                // document itself, so it is never displayed in the
-#                // browser window.
-#                var canvas = document.createElement("canvas");
-#                // Get WebGLRenderingContext from canvas element.
-#                var gl = canvas.getContext("webgl")
-#                  || canvas.getContext("experimental-webgl");
-#                // Report the result.
-#                if (gl && gl instanceof WebGLRenderingContext) {
-#                  paragraph.textContent =
-#                    "Congratulations! Your browser supports WebGL.";
-#                } else {
-#                  paragraph.textContent = "Failed to get WebGL context. "
-#                    + "Your browser or device may not support WebGL.";
-#                }
-#              }
-#            }, false);
-#        </script>
-#    </body> 
-#    </html> 
-#    """
+@app.route("/play_game/<int:game_id>")
+def play_game_page(game_id):
+    query = query_db(f'SELECT * FROM games INNER JOIN users ON games.userId=users.userId WHERE games.gameId = {game_id}')
+    return render_template('game.html', query=query)

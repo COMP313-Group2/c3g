@@ -5,36 +5,37 @@
 {% block head %}
   {{ super() }}
   <style>
-    .important { color: #336699; }
-    .card-body { margin-top: 100px;}
-    .alert {list-style: none; width: 250px; text-align: center; margin: 10px auto 0px auto;}
   </style>
 {% endblock %}
 
-<!-- content should be center -->
 {% block content %}
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
-      <ul class=flashes>
       {% for category, message in messages %}
-      <div class="text-center">
-        <div class="alert alert-warning" role="alert">
-          <li class="text-center {{ category }}">{{ message }}</li>
+      <div class="text-center p-10">
+        <div class="text-blue-400">
+          <p class="{{ category }}">{{ message }}</p>
         </div>  
       </div>
       {% endfor %}
-      </ul>
     {% endif %}
   {% endwith %}
 
-  <div class="card w-50 mb-3 border-0" style="width: 18rem; margin: auto;">
-    <div class="card-body">
+  <div class="mx-64" style="">
+    <div class="">
       {% if 'user' in session and session['user'] %}
-			  <h2 class="card-title text-center">Welcome to Titan games {{session['user']['userName']}}!</h2>
+
+			  <h2 class="title text-3xl text-center mb-10">Welcome to Titan games {{session['user']['userName']}}!</h2>
 			{% else %}
-			  <h2 class="card-title text-center">Welcome to Titan games!</h2>
+			  <h2 class="title text-3xl text-center mb-10">Welcome to Titan games!</h2>
       {% endif %}
 			<p class="card-text">The following games are available:<br>
+				Query (<em>SELECT * FROM games INNER JOIN users ON games.userId=users.userId</em>): {{query}}.  <br> <br>
+				Users: {{users}}.  <br> <br>
+				Games: {{games}}.  <br> <br>
+				You may also upload your own games after signing up.
+			</p>
+
 				<!-- Built-in games: -->
 				<!-- <ul> -->
 				<!-- 	<li> <a href="/space_pong">Space Pong</a> </li> -->
@@ -43,33 +44,39 @@
 				<!-- </ul> -->
 
 				<!-- Dynamically added games: -->
-				<ul>
-					{% for item in query %}
-					<li> <a href="/game/{{item['gameId']}}">{{item['gameName']}}</a> By: {{item['userName']}} </li>
-					{% endfor %}
-				</ul>
-				Query (<em>SELECT * FROM games INNER JOIN users ON games.userId=users.userId</em>): {{query}}.  <br> <br>
-				Users: {{users}}.  <br> <br>
-				Games: {{games}}.  <br> <br>
-				You may also upload your own games after signing up.
-			</p>
+				<div class="grid grid-cols-3 text-center gap-x-16">
+				{% for item in query %}
+					<a href="/play_game/{{item['gameId']}}">
+						<div class="bg-gradient-to-t from-gray-900 to-gray-800 shadow-outline my-12" style="box-shadow: 0 0 6px 5px rgba(17,24,39,0.9);">
+							<img class="" src="https://www.pixelstalk.net/wp-content/uploads/2016/07/3840x2160-Images-Free-Download-768x432.jpg" alt="">
+							<p class="text-gray-300 text-2xl my-2">{{item['gameName']}}</p>
+							<p class="text-gray-400 text-lg max-w-sm px-9 py-2">First person shooter using a blade gun that includes a teleporting functionality</p>
+							<p class="text-lg text-gray-500 italic">By: {{item['userName']}}</p>
+							<div class="text-gray-500 text-xs flex p-1 font-semibold justify-center my-1">
+								<span class="mr-1 p-1 px-2 font-bold">105 Watching</span>
+								<span class="mr-1 p-1 px-2 font-bold border-l border-gray-700">105 Likes</span>
+								<span class="mr-1 p-1 px-2 font-bold border-l border-gray-700">105 Dislikes</span>
+							</div>
+						</div>
+					</a>
+				{% endfor %}
+				</div>
 
-      <div class="text-center">
-          {% if 'user' in session and session['user'] %}
-          <a href="logout" class="btn btn-warning">Logout</a>
-          {% else %}
-          <a href="signup" class="btn btn-success">Sign Up</a>
-          <a href="signin" class="btn btn-primary">Sign In</a>
+      <!-- <div class="text-center"> -->
+      <!--     {% if 'user' in session and session['user'] %} -->
+      <!--     <a href="logout" class="btn btn-warning">Logout</a> -->
+      <!--     {% else %} -->
+      <!--     <a href="signup" class="btn btn-success">Sign Up</a> -->
+      <!--     <a href="signin" class="btn btn-primary">Sign In</a> -->
 
-          {{user}}
-          {% endif %}
+      <!--     {{user}} -->
+      <!--     {% endif %} -->
 
-      </div>
+      <!-- </div> -->
     </div>
   </div>
 {% endblock %}
 
 {% block footer %}
-  {{ super() }}
-  <!-- <p>This is the footer from the index child template</p> -->
+  {{ super() }} <!-- <p>This is the footer from the base child template</p> -->
 {% endblock %}

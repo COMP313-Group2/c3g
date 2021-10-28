@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}{{query[0]['gameName']}}{% endblock %}
+
+{% block head %}
+  {{ super() }}
+{% endblock %}
+
+{% block content %}
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+      <div class="text-center p-10">
+        <div class="text-blue-400">
+          <p class="{{ category }}">{{ message }}</p>
+        </div>  
+      </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+	{% for item in query %}
+	<div class="flex flex-col items-center">
+		<h2 class="title text-3xl text-center mb-10">{{item['gameName']}}</h2>
+		<iframe src="/game/{{item['gameId']}}" frameBorder="0" height="650px" width="960px"></iframe>
+		<p class="mt-9 text-lg text-gray-500 italic">By: {{item['userName']}}</p>
+	</div>
+	{% endfor %}
+{% endblock %}
+
+				<!-- <li> <a href="/game/{{item['gameId']}}">{{item['gameName']}}</a> By: {{item['userName']}} </li> -->
+				<!-- <div class="grid grid-cols-3 text-center place-items-center py-12"> -->
+				<!-- 	<div class="bg-gradient-to-tr from-gray-900 to-gray-800 shadow-outline my-12" style="box-shadow: 0 0 6px 5px rgba(17,24,39,0.9);"> -->
+				<!-- 		<img class="max-w-sm" src="https://www.pixelstalk.net/wp-content/uploads/2016/07/3840x2160-Images-Free-Download-768x432.jpg" alt=""> -->
+				<!-- 		<a class="text-gray-300 text-2xl my-2" href="/game/{{item['gameId']}}">{{item['gameName']}}</a> -->
+				<!-- 		<p class="text-gray-400 text-lg max-w-sm px-9 py-2">First person shooter using a blade gun that includes a teleporting functionality</p> -->
+				<!-- 		<p class="text-lg text-gray-500 italic">By: {{item['userName']}}</p> -->
+				<!-- 		<div class="text-gray-500 text-xs flex p-1 font-semibold justify-center my-1"> -->
+				<!-- 			<span class="mr-1 p-1 px-2 font-bold">105 Watching</span> -->
+				<!-- 			<span class="mr-1 p-1 px-2 font-bold border-l border-gray-700">105 Likes</span> -->
+				<!-- 			<span class="mr-1 p-1 px-2 font-bold border-l border-gray-700">105 Dislikes</span> -->
+				<!-- 		</div> -->
+				<!-- 	</div> -->
+				<!-- </div> -->
+
+{% block footer %}
+{% endblock %}

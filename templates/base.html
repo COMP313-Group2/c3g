@@ -1,65 +1,64 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    {% block head %}
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet"
-              integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl"
-              crossorigin="anonymous">
+	{% block head %}
+	<meta charset="UTF-8">
+	<title>{% block title %}{% endblock %}</title>
+	<link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Audiowide" rel="stylesheet"> 
+	<style>
+		.title {
+			text-shadow: 3px 3px #111827;
+			font-family: 'Audiowide', sans-serif;
+			text-shadow: 0 0 1px #fff, 0 0 5px #0fa;
+		}
 
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
-        <title>{% block title %}{% endblock %}</title>
-				<style>
-					*{
-							font-family: Arial, Helvetica, sans-serif;
-					}
+		.header {
+			text-shadow: 0 0 1px #fff, 0 0 5px #10B981;
+		}
 
-					.drop-shadow{
-							-webkit-box-shadow: 3px 4px 8px -5px rgba(0,0,0,0.75);
-							-moz-box-shadow: 3px 4px 8px -5px rgba(0,0,0,0.75);
-							box-shadow: 3px 4px 8px -5px rgba(0,0,0,0.75);
-					}
-				</style>
-    {% endblock %}
+		input {
+			color: #333;
+			border-radius: 0.25rem;
+			padding: 0.3rem;
+		}
+	</style>
+	{% endblock %}
 </head>
-<body>
-<div class="container">
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-light fixed-top sticky-top px-2" style="background-color: #b3e5fc;">
-        <a class="navbar-brand" href="/">Titan Games</a>
-        <ul class="navbar-nav">
-            <li class="nav-item">
-								{% if 'user' in session and session['user'] %}
-                <a href="/" class="nav-link">Home</a>
-                {% endif %}
-            </li>
+<body class="text-white bg-gray-800 flex flex-col min-h-full">
 
+	<div class="grid grid-cols-3 content-center text-center bg-gray-900 p-4 text-white mb-20" style="box-shadow: 0 0 6px 5px rgba(17,24,39,0.9);">
+		<a class="title text-3xl" href="/">Titan Games</a>
+	  <form class="relative mx-auto text-gray-600" method="post" action="/index.html">
+			<input class="border-2 border-gray-300 bg-white h-10 px-5 pr-16 rounded-lg text-sm focus:outline-none" type="search" name="search" placeholder="Search">
+			<button type="submit" class="absolute right-0 top-0 mt-3 mr-4">
+				<svg class="text-gray-600 h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg"
+					xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px"
+					viewBox="0 0 56.966 56.966" style="enable-background:new 0 0 56.966 56.966;" xml:space="preserve"
+					width="512px" height="512px">
+					<path
+						d="M55.146,51.887L41.588,37.786c3.486-4.144,5.396-9.358,5.396-14.786c0-12.682-10.318-23-23-23s-23,10.318-23,23  s10.318,23,23,23c4.761,0,9.298-1.436,13.177-4.162l13.661,14.208c0.571,0.593,1.339,0.92,2.162,0.92  c0.779,0,1.518-0.297,2.079-0.837C56.255,54.982,56.293,53.08,55.146,51.887z M23.984,6c9.374,0,17,7.626,17,17s-7.626,17-17,17  s-17-7.626-17-17S14.61,6,23.984,6z" />
+				</svg>
+			</button>
+		</form>
+		<div class="">
+			{% if 'user' in session %}
+			<a class="bg-green-500 font-bold py-2 px-4 rounded-lg" href="/user">Upload Game</a>
+			<a class="bg-yellow-400 text-gray-900 font-bold py-2 px-4 rounded-lg" href="/logout">Log Out</a>
+			<!-- <a class="inline bg-purple-900 font-bold rounded-3xl py-3 px-5" href="/logout">H</a> -->
+			{% else %}
+			<a class="bg-green-500 font-bold py-2 px-4 rounded-lg" href="signup">Sign Up</a>
+			<a class="bg-blue-500 font-bold py-2 px-4 rounded-lg" href="signin">Sign In</a>
+			{% endif %}
+		</div>
+	</div>
 
-            {% if 'user' in session %}
-                <li class="nav-item">
-                    <a class="nav-link" href="/user">Upload Game</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/logout">Logout</a>
-                </li>
-            {% else %}
-                <li class="nav-item">
-                    <a class="nav-link" href="/signup">Sign Up</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/signin">Sign In</a>
-                </li>
-            {% endif %}
+	{% block content %} {% endblock %} 
 
-        </ul>
-        <!-- </div> -->
-    </nav>
-            <div>
-                {% block content %}
-                {% endblock %}
-            </div>
-                <footer class="container text-center" style="background-color: #b3e5fc;">
-                        <p class="p-3">Copyright 2021 &copy; Titan Games</p>
-                </footer>
-        </div>
+	<footer class="text-lg bg-gray-900 text-gray-500 text-center tracking-wide italic p-8 mt-20" style="box-shadow: 0 0 6px 5px rgba(17,24,39,0.9);">
+		Copyright 2021 &copy; Titan Games
+	</footer>
 </body>
 </html>
