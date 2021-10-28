@@ -4,8 +4,7 @@
 
 {% block head %}
   {{ super() }}
-  <style>
-  </style>
+  <style></style>
 {% endblock %}
 
 {% block content %}
@@ -33,6 +32,7 @@
 				Query (<em>SELECT * FROM games INNER JOIN users ON games.userId=users.userId</em>): {{query}}.  <br> <br>
 				Users: {{users}}.  <br> <br>
 				Games: {{games}}.  <br> <br>
+				Stars: {{stars}}.  <br> <br>
 				You may also upload your own games after signing up.
 			</p>
 
@@ -52,11 +52,26 @@
 							<p class="text-gray-300 text-2xl my-2">{{item['gameName']}}</p>
 							<p class="text-gray-400 text-lg max-w-sm px-9 py-2">First person shooter using a blade gun that includes a teleporting functionality</p>
 							<p class="text-lg text-gray-500 italic">By: {{item['userName']}}</p>
-							<div class="text-gray-500 text-xs flex p-1 font-semibold justify-center my-1">
-								<span class="mr-1 p-1 px-2 font-bold">105 Watching</span>
-								<span class="mr-1 p-1 px-2 font-bold border-l border-gray-700">105 Likes</span>
-								<span class="mr-1 p-1 px-2 font-bold border-l border-gray-700">105 Dislikes</span>
-							</div>
+							<p>
+							{% for star in stars %}
+								{% if star['gameId'] == item['gameId'] %}
+									{% for i in range(star['AVG(star)'] | int()) %}
+										<span class="fa fa-star text-yellow-300"></span>
+									{% endfor %}
+									{{star['AVG(star)']}}
+								{% endif %}
+							{% endfor %}
+							</p>
+							<!-- <div class="text-gray-500 text-xs flex p-1 font-semibold justify-center my-1"> -->
+							<!-- 	<span class="mr-1 p-1 px-2 font-bold">105 Watching</span> -->
+							<!-- 	<span class="mr-1 p-1 px-2 font-bold border-l border-gray-700">105 Likes</span> -->
+							<!-- 	<span class="mr-1 p-1 px-2 font-bold border-l border-gray-700">105 Dislikes</span> -->
+							<!-- 	<span class="fa fa-star text-yellow-300"></span> -->
+							<!-- 	<span class="fa fa-star text-yellow-300"></span> -->
+							<!-- 	<span class="fa fa-star text-yellow-300"></span> -->
+							<!-- 	<span class="fa fa-star text-yellow-300"></span> -->
+							<!-- 	<span class="fa fa-star text-gray-300"></span> -->
+							<!-- </div> -->
 						</div>
 					</a>
 				{% endfor %}

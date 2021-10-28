@@ -19,12 +19,56 @@
     {% endif %}
   {% endwith %}
 
-	{% for item in query %}
+	<iframe name="useless" style="display:none;"></iframe>
+	{% for item in query %} <!-- should only have one value -->
 	<div class="flex flex-col items-center">
 		<h2 class="title text-3xl text-center mb-10">{{item['gameName']}}</h2>
 		<iframe src="/game/{{item['gameId']}}" frameBorder="0" height="650px" width="960px"></iframe>
 		<p class="mt-9 text-lg text-gray-500 italic">By: {{item['userName']}}</p>
+		<div>
+			<p>Rate this game!</p>
+			<!-- <span onClick="rateGame().then(x => alert(x));" class="fa fa-star text-yellow-300"></span> -->
+			<form action="/rate_game/{{item['gameId']}}/1" method="post" target="useless">
+				<button>
+					<span class="fa fa-star text-yellow-300"></span>
+				</button>
+      </form>   
+			<form action="/rate_game/{{item['gameId']}}/2" method="post" target="useless">
+				<button>
+					<span class="fa fa-star text-yellow-300"></span>
+				</button>
+      </form>   
+			<form action="/rate_game/{{item['gameId']}}/3" method="post" target="useless">
+				<button>
+					<span class="fa fa-star text-yellow-300"></span>
+				</button>
+      </form>   
+			<form action="/rate_game/{{item['gameId']}}/4" method="post" target="useless">
+				<button>
+					<span class="fa fa-star text-yellow-300"></span>
+				</button>
+      </form>   
+			<form action="/rate_game/{{item['gameId']}}/5" method="post" target="useless">
+				<button>
+					<span class="fa fa-star text-gray-300"></span>
+				</button>
+      </form>   
+		</div>
 	</div>
+
+	<script>
+		const rateGame = async () => {
+			const response = await fetch('http://example.com/movies.json', {
+				method: 'POST',
+				body: myBody, // string or object
+				headers: {
+					'Content-Type': 'application/json'
+				}
+			});
+			const myJson = await response.json(); //extract JSON from the http response
+			// do something with myJson
+		}
+	</script>
 	{% endfor %}
 {% endblock %}
 

@@ -1,20 +1,34 @@
 -- SQLite3 db
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS games;
+DROP TABLE IF EXISTS stars;
+DROP TABLE IF EXISTS comments;
 
 CREATE TABLE users (
-  userId INTEGER PRIMARY KEY AUTOINCREMENT,
+  userId INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
   userName TEXT NOT NULL,
   email TEXT UNIQUE NOT NULL,
   password TEXT NOT NULL
 );
 
 CREATE TABLE games (
-  gameId INTEGER PRIMARY KEY AUTOINCREMENT,
+  gameId INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
 	userId INTEGER,
 	gameName TEXT NOT NULL,
   FOREIGN KEY(userId) REFERENCES users(userId)
 );
+
+CREATE TABLE stars (
+	userId INTEGER NOT NULL,
+  gameId INTEGER NOT NULL,
+	star INTEGER NOT NULL,
+  PRIMARY KEY (userId, gameId),
+  FOREIGN KEY(userId) REFERENCES users(userId),
+  FOREIGN KEY(gameId) REFERENCES games(gameId)
+);
+
+-- Future tables:
+-- comments: __userid, gameid, date__, commentstring
 
 -- Initialize data in db with example data
 --INSERT INTO users (userName, email, password) 

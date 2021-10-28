@@ -71,8 +71,9 @@ def init_db():
 def home_page():
     users = query_db('SELECT * FROM users')
     games = query_db('SELECT * FROM games')
+    stars = query_db('SELECT gameId, AVG(star) FROM stars GROUP BY gameId')
     query = query_db('SELECT * FROM games INNER JOIN users ON games.userId=users.userId')
-    return render_template('index.html', users=users, games=games, query=query)
+    return render_template('index.html', users=users, games=games, stars=stars, query=query)
 
 
 # Validate data format is correct
@@ -158,8 +159,8 @@ def user_page():
             # folder_snake = re.sub('.zip', '', filename_snake) # TODO remove
 
             # NOTE: change base when switching between local and remote development
-            # base = "/home/hassan/repo/c3g/static/"
-            base = "/home/public/c3g/static/"
+            base = "/home/hassan/repo/c3g/static/"
+            # base = "/home/public/c3g/static/"
 
             game_id = query_db('SELECT ifnull(max(userId), 0) FROM games;')[0]['ifnull(max(userId), 0)'] + 1
 
@@ -241,7 +242,28 @@ def user_page():
 def game_page(game_id):
     return send_file(f'static/game/{game_id}/index.html')
 
+
 @app.route("/play_game/<int:game_id>")
 def play_game_page(game_id):
     query = query_db(f'SELECT * FROM games INNER JOIN users ON games.userId=users.userId WHERE games.gameId = {game_id}')
     return render_template('game.html', query=query)
+
+
+@app.route('/rate_game/<int:game_id>/<int:star>', methods=['POST'])
+def rate_game(game_id, star):
+    if 'user' in session and session['user']:
+        query = query_db(f'SELECT * FROM stars WHERE userId = {session["user"]["userId"]} AND gameId = {game_id}')
+        if query != []:
+            # update
+            db = get_db()
+            db.execute(f'UPDATE stars SET star = {star} WHERE userId = {session["user"]["userId"]} AND gameId = {game_id}')
+            db.commit()
+        else: 
+            # insert
+            db = get_db()
+            db.execute('INSERT INTO stars (userId, gameId, star) VALUES (?, ?, ?)', 
+                    (session['user']['userId'], game_id, star))
+            db.commit()
+        return redirect(f'/play_game/{game_id}')
+    else:
+        return "You must be logged in to rate a game", 500
