@@ -29,7 +29,7 @@
 			  <h2 class="title text-3xl text-center mb-10">Welcome to Titan games!</h2>
       {% endif %}
 			<p class="card-text">The following games are available:<br>
-				Query (<em>SELECT * FROM games INNER JOIN users ON games.userId=users.userId</em>): {{query}}.  <br> <br>
+			Query (<em>SELECT *, AVG(star) FROM stars INNER JOIN games ON stars.gameId=games.gameId INNER JOIN users ON games.userId=users.userId GROUP BY games.gameId</em>): <br> {{query}}. <br> <br>
 				Users: {{users}}.  <br> <br>
 				Games: {{games}}.  <br> <br>
 				Stars: {{stars}}.  <br> <br>

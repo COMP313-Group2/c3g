@@ -74,7 +74,7 @@ def home_page():
     games = query_db('SELECT * FROM games')
     stars = query_db('SELECT gameId, AVG(star) FROM stars GROUP BY gameId')
     comments = query_db('SELECT * FROM comments ORDER BY date DESC')
-    query = query_db('SELECT * FROM games INNER JOIN users ON games.userId=users.userId')
+    query = query_db('SELECT *, AVG(star) FROM stars INNER JOIN games ON stars.gameId=games.gameId INNER JOIN users ON games.userId=users.userId GROUP BY games.gameId ORDER BY AVG(star) DESC')
     return render_template('index.html', users=users, games=games, stars=stars, comments=comments, query=query)
 
 
@@ -282,7 +282,7 @@ def forgot_password_page():
 
 
 @app.route("/reset_password/<int:user_id>", methods=['GET', 'POST'])
-def reset_password(user_id):
+def reset_password_page(user_id):
     if request.method == 'GET':
         return render_template('reset_password.html', user_id=user_id)
 
@@ -292,3 +292,10 @@ def reset_password(user_id):
         db.commit()
         flash('Password has been updated!')
         return redirect('/')
+
+@app.route("/search", methods=['POST'])
+def search_page():
+    if request.method == 'POST':
+        q = " OR ".join([f'gameName LIKE "%{x}%"' for x in request.form['search'].split()])
+        query = query_db('SELECT *, AVG(star) FROM stars INNER JOIN games ON stars.gameId=games.gameId INNER JOIN users ON games.userId=users.userId WHERE ' + q + ' GROUP BY games.gameId')
+        return render_template('search.html', query=query)

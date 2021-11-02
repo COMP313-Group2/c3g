@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Index{% endblock %}
+
+{% block head %}
+  {{ super() }}
+  <style></style>
+{% endblock %}
+
+{% block content %}
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+      <div class="text-center p-10">
+        <div class="text-blue-400">
+          <p class="{{ category }}">{{ message }}</p>
+        </div>  
+      </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <div class="mx-64" style="">
+			<div class="grid grid-cols-3 text-center gap-x-16">
+			{% for item in query %}
+				<a href="/play_game/{{item['gameId']}}">
+					<div class="bg-gradient-to-t from-gray-900 to-gray-800 shadow-outline my-12" style="box-shadow: 0 0 6px 5px rgba(17,24,39,0.9);">
+						<img class="" src="https://www.pixelstalk.net/wp-content/uploads/2016/07/3840x2160-Images-Free-Download-768x432.jpg" alt="">
+						<p class="text-gray-300 text-2xl my-2">{{item['gameName']}}</p>
+						<p class="text-gray-400 text-lg max-w-sm px-9 py-2">First person shooter using a blade gun that includes a teleporting functionality</p>
+						<p class="text-lg text-gray-500 italic">By: {{item['userName']}}</p>
+						<p>
+							{% for i in range(item['AVG(star)'] | int()) %}
+								<span class="fa fa-star text-yellow-300"></span>
+							{% endfor %}
+							{{item['AVG(star)']}}
+						</p>
+					</div>
+				</a>
+			{% endfor %}
+    </div>
+  </div>
+{% endblock %}
+
+{% block footer %}
+  {{ super() }} <!-- <p>This is the footer from the base child template</p> -->
+{% endblock %}
