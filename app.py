@@ -74,7 +74,7 @@ def home_page():
     games = query_db('SELECT * FROM games')
     stars = query_db('SELECT gameId, AVG(star) FROM stars GROUP BY gameId')
     comments = query_db('SELECT * FROM comments ORDER BY date DESC')
-    query = query_db('SELECT *, AVG(star) FROM stars INNER JOIN games ON stars.gameId=games.gameId INNER JOIN users ON games.userId=users.userId GROUP BY games.gameId ORDER BY AVG(star) DESC')
+    query = query_db('SELECT games.gameId, gameName, userName, AVG(star) FROM games LEFT OUTER JOIN stars ON games.gameId=stars.gameId INNER JOIN users ON games.userId=users.userId GROUP BY games.gameId ORDER BY AVG(star) DESC')
     return render_template('index.html', users=users, games=games, stars=stars, comments=comments, query=query)
 
 
@@ -297,5 +297,6 @@ def reset_password_page(user_id):
 def search_page():
     if request.method == 'POST':
         q = " OR ".join([f'gameName LIKE "%{x}%"' for x in request.form['search'].split()])
-        query = query_db('SELECT *, AVG(star) FROM stars INNER JOIN games ON stars.gameId=games.gameId INNER JOIN users ON games.userId=users.userId WHERE ' + q + ' GROUP BY games.gameId')
+        #query = query_db('SELECT games.gameId, gameName, userName, AVG(star) FROM stars INNER JOIN games ON stars.gameId=games.gameId INNER JOIN users ON games.userId=users.userId WHERE ' + q + ' GROUP BY games.gameId')
+        query = query_db('SELECT games.gameId, gameName, userName, AVG(star) FROM games LEFT OUTER JOIN stars ON games.gameId=stars.gameId INNER JOIN users ON games.userId=users.userId WHERE ' + q + ' GROUP BY games.gameId ORDER BY AVG(star) DESC')
         return render_template('search.html', query=query)
