@@ -22,7 +22,16 @@ CREATE TABLE stars (
 	userId INTEGER NOT NULL,
   gameId INTEGER NOT NULL,
 	star INTEGER NOT NULL,
-  PRIMARY KEY (userId, gameId),
+  PRIMARY KEY(userId, gameId),
+  FOREIGN KEY(userId) REFERENCES users(userId),
+  FOREIGN KEY(gameId) REFERENCES games(gameId)
+);
+
+CREATE TABLE comments (
+	userId INTEGER NOT NULL,
+  gameId INTEGER NOT NULL,
+  date DATE DEFAULT CURRENT_TIMESTAMP,
+	comment TEXT,
   FOREIGN KEY(userId) REFERENCES users(userId),
   FOREIGN KEY(gameId) REFERENCES games(gameId)
 );

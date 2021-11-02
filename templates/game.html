@@ -20,72 +20,51 @@
   {% endwith %}
 
 	<iframe name="useless" style="display:none;"></iframe>
-	{% for item in query %} <!-- should only have one value -->
+	{% for item in query %}
 	<div class="flex flex-col items-center">
 		<h2 class="title text-3xl text-center mb-10">{{item['gameName']}}</h2>
-		<iframe src="/game/{{item['gameId']}}" frameBorder="0" height="650px" width="960px"></iframe>
+		<iframe src="/game/{{item['gameId']}}" height="650" width="960"></iframe>
 		<p class="mt-9 text-lg text-gray-500 italic">By: {{item['userName']}}</p>
+		{% if 'user' in session and session['user'] %}
 		<div>
 			<p>Rate this game!</p>
-			<!-- <span onClick="rateGame().then(x => alert(x));" class="fa fa-star text-yellow-300"></span> -->
-			<form action="/rate_game/{{item['gameId']}}/1" method="post" target="useless">
+			{% for i in range(1, 6) %}
+			<form style="display:inline" action="/rate_game/{{item['gameId']}}/{{i}}" method="post" target="useless">
 				<button>
 					<span class="fa fa-star text-yellow-300"></span>
 				</button>
       </form>   
-			<form action="/rate_game/{{item['gameId']}}/2" method="post" target="useless">
-				<button>
-					<span class="fa fa-star text-yellow-300"></span>
-				</button>
-      </form>   
-			<form action="/rate_game/{{item['gameId']}}/3" method="post" target="useless">
-				<button>
-					<span class="fa fa-star text-yellow-300"></span>
-				</button>
-      </form>   
-			<form action="/rate_game/{{item['gameId']}}/4" method="post" target="useless">
-				<button>
-					<span class="fa fa-star text-yellow-300"></span>
-				</button>
-      </form>   
-			<form action="/rate_game/{{item['gameId']}}/5" method="post" target="useless">
-				<button>
-					<span class="fa fa-star text-gray-300"></span>
-				</button>
-      </form>   
-		</div>
-	</div>
+			{% endfor %}
+			<hr>
 
-	<script>
-		const rateGame = async () => {
-			const response = await fetch('http://example.com/movies.json', {
-				method: 'POST',
-				body: myBody, // string or object
-				headers: {
-					'Content-Type': 'application/json'
-				}
-			});
-			const myJson = await response.json(); //extract JSON from the http response
-			// do something with myJson
-		}
-	</script>
+			<p>Leave Your Comment!</p>
+			<form method="post" action="/comment_game/{{item['gameId']}}">
+				<div class="form-group">
+					<label for="comment">Comment:</label>
+					<textarea class="form-control rounded-lg text-black p-2" id="comment" name="comment" rows="4" cols="50"></textarea>
+				</div>
+				<input type="submit" value="Submit">
+			</form>
+			<hr>
+			
+			<p>Comments:</p>
+			<!-- <p>{{comments}}</p> -->
+			{% for comment in comments %}
+			<div>
+				<p>{{comment['userName']}} commented on {{comment['date']}}:</p>
+				<p>{{comment['comment']}}</p>
+			</div>
+			{% endfor %}
+
+
+
+		</div>
+		{% else %}
+		<p>Sign in to rate and comment on this game!</p>
+		{% endif %}
+	</div>
 	{% endfor %}
 {% endblock %}
-
-				<!-- <li> <a href="/game/{{item['gameId']}}">{{item['gameName']}}</a> By: {{item['userName']}} </li> -->
-				<!-- <div class="grid grid-cols-3 text-center place-items-center py-12"> -->
-				<!-- 	<div class="bg-gradient-to-tr from-gray-900 to-gray-800 shadow-outline my-12" style="box-shadow: 0 0 6px 5px rgba(17,24,39,0.9);"> -->
-				<!-- 		<img class="max-w-sm" src="https://www.pixelstalk.net/wp-content/uploads/2016/07/3840x2160-Images-Free-Download-768x432.jpg" alt=""> -->
-				<!-- 		<a class="text-gray-300 text-2xl my-2" href="/game/{{item['gameId']}}">{{item['gameName']}}</a> -->
-				<!-- 		<p class="text-gray-400 text-lg max-w-sm px-9 py-2">First person shooter using a blade gun that includes a teleporting functionality</p> -->
-				<!-- 		<p class="text-lg text-gray-500 italic">By: {{item['userName']}}</p> -->
-				<!-- 		<div class="text-gray-500 text-xs flex p-1 font-semibold justify-center my-1"> -->
-				<!-- 			<span class="mr-1 p-1 px-2 font-bold">105 Watching</span> -->
-				<!-- 			<span class="mr-1 p-1 px-2 font-bold border-l border-gray-700">105 Likes</span> -->
-				<!-- 			<span class="mr-1 p-1 px-2 font-bold border-l border-gray-700">105 Dislikes</span> -->
-				<!-- 		</div> -->
-				<!-- 	</div> -->
-				<!-- </div> -->
 
 {% block footer %}
 {% endblock %}

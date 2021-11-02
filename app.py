@@ -9,6 +9,7 @@ import shutil # File operations
 import os
 import fileinput
 import sys
+import yagmail
 
 app = Flask(__name__, static_url_path='')
 app.secret_key = b'148c8959c6ba9202c4d6a018d90554f53023a862f9e7ce136a6e30a6700e753c'
@@ -72,8 +73,9 @@ def home_page():
     users = query_db('SELECT * FROM users')
     games = query_db('SELECT * FROM games')
     stars = query_db('SELECT gameId, AVG(star) FROM stars GROUP BY gameId')
+    comments = query_db('SELECT * FROM comments ORDER BY date DESC')
     query = query_db('SELECT * FROM games INNER JOIN users ON games.userId=users.userId')
-    return render_template('index.html', users=users, games=games, stars=stars, query=query)
+    return render_template('index.html', users=users, games=games, stars=stars, comments=comments, query=query)
 
 
 # Validate data format is correct
@@ -162,6 +164,7 @@ def user_page():
             base = "/home/hassan/repo/c3g/static/"
             # base = "/home/public/c3g/static/"
 
+            # TODO: replace query_db('SELECT ifnull(max(userId), 0) FROM games;', one=True) to remove [0]
             game_id = query_db('SELECT ifnull(max(userId), 0) FROM games;')[0]['ifnull(max(userId), 0)'] + 1
 
             f.save(f"{base}{f.filename}")
@@ -220,24 +223,6 @@ def user_page():
         return render_template('index.html')
 
 
-# Games (Built-in)
-# @app.route("/space_pong")
-# def space_pong():
-#     return render_template('space_pong/index.html')
-
-# @app.route("/excaliburs_quest")
-# def excaliburs_quest():
-#     return render_template('excaliburs_quest/index.html')
-
-# @app.route("/potato_tomato")
-# def potato_tomato():
-#     return render_template('potato_tomato/index.html')
-
-# # Dynamically added Games
-# @app.route("/blade_runner")
-# def blade_runner2():
-#     return send_file('static/game/1/index.html')
-
 @app.route("/game/<int:game_id>")
 def game_page(game_id):
     return send_file(f'static/game/{game_id}/index.html')
@@ -246,11 +231,12 @@ def game_page(game_id):
 @app.route("/play_game/<int:game_id>")
 def play_game_page(game_id):
     query = query_db(f'SELECT * FROM games INNER JOIN users ON games.userId=users.userId WHERE games.gameId = {game_id}')
-    return render_template('game.html', query=query)
+    comments = query_db(f"SELECT * FROM comments INNER JOIN users WHERE gameId = {game_id} ORDER BY date DESC")
+    return render_template('game.html', query=query, comments=comments)
 
 
-@app.route('/rate_game/<int:game_id>/<int:star>', methods=['POST'])
-def rate_game(game_id, star):
+@app.route("/rate_game/<int:game_id>/<int:star>", methods=['POST'])
+def rate_game_api(game_id, star):
     if 'user' in session and session['user']:
         query = query_db(f'SELECT * FROM stars WHERE userId = {session["user"]["userId"]} AND gameId = {game_id}')
         if query != []:
@@ -267,3 +253,42 @@ def rate_game(game_id, star):
         return redirect(f'/play_game/{game_id}')
     else:
         return "You must be logged in to rate a game", 500
+
+
+@app.route("/comment_game/<int:game_id>", methods=['POST'])
+def comment_game_api(game_id):
+    if 'user' in session and session['user']:
+        db = get_db()
+        db.execute('INSERT INTO comments (userId, gameId, comment) VALUES (?, ?, ?)', 
+                (session['user']['userId'], game_id, request.form['comment']))
+        db.commit()
+        return redirect(f'/play_game/{game_id}')
+    else:
+        return "You must be logged in to rate a game", 500
+
+
+@app.route("/forgot_password", methods=['GET', 'POST'])
+def forgot_password_page():
+    if request.method == 'GET':
+        return render_template('forgot_password.html')
+
+    elif request.method == 'POST':
+        user = query_db(f'SELECT * FROM users WHERE email = "{request.form["email"]}"', one=True)
+        yagmail.SMTP('hassan149367@gmail.com', 'WMP4s4SgC2syEqa').send(user['email'], 
+                'Forgot Password for Titan Games', 
+                f'Hello {user["userName"]}, it seems you forgot your password. To reset your password, click the following link: <a href="https://c3g.nfshost.com/reset_password/{user["userId"]}">Reset Password</a>.')
+        flash('Email has been sent!')
+        return redirect('/')
+
+
+@app.route("/reset_password/<int:user_id>", methods=['GET', 'POST'])
+def reset_password(user_id):
+    if request.method == 'GET':
+        return render_template('reset_password.html', user_id=user_id)
+
+    elif request.method == 'POST':
+        db = get_db()
+        db.execute(f'UPDATE users SET password = "{request.form["password"]}" WHERE userId = {user_id}')
+        db.commit()
+        flash('Password has been updated!')
+        return redirect('/')
