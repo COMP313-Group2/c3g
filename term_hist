@@ -1,7 +1,7 @@
 ls
 apt-get
 
-uname -r
+uname -r 
 mkdir c3g
 ls
 cd c3g
@@ -267,3 +267,246 @@ nvim /home/private/opt/postgresql/data/pg_hba.conf
 psql -h localhost -U c3g -d postgres
 nvim /home/private/opt/postgresql/data/pg_hba.conf 
 psql -h localhost -U c3g -d postgres
+ls
+cd ../private/
+ls
+nvim term_hist
+ls -la
+nvim .bash_history
+cp .bash_history term_hist 
+nvim term_hist 
+mv term_hist ../public/c3g/
+cd ../public/c3g/
+ls
+ls -la
+git status
+git commit add .
+git commit .
+git status
+git add term_hist 
+git status
+git config --global --edit
+git config --global --edit
+ls
+ls -la
+mv .git ../git
+ls
+ls -la
+git status
+git init
+git commit -m "init c3g"
+git add .
+git status
+git remote add origin https://github.com/COMP313-Group2/c3g.git
+git push
+git push --set-upstream origin master
+git branch -M main
+git remote add origin https://github.com/COMP313-Group2/c3g.git
+git push -u origin main
+git status
+git push
+git push --set-upstream origin main
+git push --set-upstream origin master
+git push -f origin mater
+git push -f origin master
+git push -f origin main
+git status
+git commit -m 'init c3g'
+git status
+git push --set-upstream origin master
+git push --set-upstream origin main
+git push --set-upstream origin main
+git push --set-upstream origin main
+git push --set-upstream origin main
+ls
+nvim README.md
+git status
+git add README.md
+git status
+git ls
+git status
+git commit -m 'add readme'
+git status
+git push
+git config --global credential.helper store
+git push
+git push
+ls
+ls
+cd templates/ls
+cd templates/
+ls
+nvim index.html
+nvim base.html
+ls
+cd ..
+ls
+nvim app.py 
+ls
+nvim app.py 
+nvim ../../protected/run-flask.sh 
+ls
+nvim app.py 
+cd static/
+ls
+cd ../templates/
+ls
+cd ..
+ls
+nvim app.py 
+ls
+nvim ../../protected/run-flask.sh 
+mv app.py app1.py
+nvim app.py
+ls
+nvim app.py 
+git status
+git add .
+git status
+git commit -m 'base website'
+git push
+git status
+git pull
+git pull
+nvim app
+nvim app.py 
+nvim app.py 
+ls
+cd c3g
+ls
+git status
+exit
+ls
+cd c3g
+ls
+nvim app
+nvim app.py 
+nvim app.py 
+exit
+cd c3g
+ls
+git pull
+rm app.py 
+git pull
+git pull
+nvim app.py 
+git pull
+git pull
+git pull
+nvim app.py 
+nvim app.py 
+git pull
+git pull
+nvim app.py
+rm app.py
+nvim app.py
+git pull
+cd ../private/
+ls
+../protected/
+ls
+ls
+cd ../protected
+ls
+nvim run-
+nvim run-flask.sh 
+./run-flask.sh 
+ls
+cd c3g
+ls
+nvim app.py 
+cd ../protected/
+ls
+nvim run-flask.sh 
+cd c3g
+ls
+git status
+git restore app.py
+git pull
+cd c3g
+git pull
+ls
+cd c3g
+ls
+git pull
+ls
+nvim app1.py 
+rm -rf app1.py
+ls
+nvim app.py 
+ls -la
+ls static
+mkdir static
+ls
+mkdir static/game
+fg
+fg
+mkdir static/game
+nvim app.py 
+nvim app.py 
+nvim app.py 
+nvim app.py 
+ls
+cd ../
+ls
+cd ..
+ls
+nvim logs/
+nvim protected/run-flask.sh 
+nvim logs/daemon_flask.log 
+touch /home/public/c3g/static/foo
+rm /home/public/c3g/static/foo
+nvim logs/daemon_flask.log 
+cd /home/public/c3g/static
+ls
+cd ..
+ls
+nvim app.py 
+nvim schema.sql 
+nvim schema.sql 
+git status
+git add .; git commit -m "works on server"; git push
+exit
+cd c3g/
+ls
+git pull
+exit
+ls
+cd c3g/
+ls
+git pull
+git status
+git restore database.db 
+git pull
+cd static/game/
+ls
+cd ..
+ls
+cd game/
+ls
+rm -rf *
+ls
+cd ..
+ls
+cd ..
+ls
+cd logs/
+ls
+nvim daemon_flask.log 
+cd ../public/
+ls
+cd c3g/static/game/
+ls
+cd c3g/
+ls
+git pull
+ls
+nvim app.py 
+ls
+nvim schema.sql 
+cd static/
+ls
+cd game/
+ls
+rm -rf 1
+exit
