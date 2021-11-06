@@ -20,7 +20,7 @@
   {% endwith %}
 
 	<iframe name="useless" style="display:none;"></iframe>
-	{% for item in query %}
+  {% with item = query[0] %}
 	<div class="flex flex-col items-center">
 		<h2 class="title text-3xl text-center mb-10">{{item['gameName']}}</h2>
 		<iframe src="/game/{{item['gameId']}}" height="650" width="960"></iframe>
@@ -46,24 +46,32 @@
 				<input type="submit" value="Submit">
 			</form>
 			<hr>
-			
-			<p>Comments:</p>
-			<!-- <p>{{comments}}</p> -->
-			{% for comment in comments %}
+		{% else %}
+			<p>Sign in to rate and comment on this game!</p>
+		{% endif %}
+
+		<p class="text-3xl">Comments:</p>
+		{% if 'user' in session and session['user'] and comments == [] %}
+			<div>
+				<p>No comments. Why not add one?</p>
+			</div>
+		{% elif comments == [] %}
+			<div>
+				<p>No comments.</p>
+			</div>
+		{% endif %}
+		{% for comment in comments %}
 			<div>
 				<p>{{comment['userName']}} commented on {{comment['date']}}:</p>
 				<p>{{comment['comment']}}</p>
 			</div>
-			{% endfor %}
-
-
-
+		{% endfor %}
 		</div>
-		{% else %}
-		<p>Sign in to rate and comment on this game!</p>
-		{% endif %}
 	</div>
-	{% endfor %}
+	{% endwith %}
+
+
+
 {% endblock %}
 
 {% block footer %}

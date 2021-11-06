@@ -16,6 +16,15 @@
 			<input type="text" id="name" class="form-control" name="name" required pattern="(\w| )+"><br><br>
 		</div>
 		<div class="form-group">
+			<label for="role">Choose an account type:</label>
+			<select name="role" class="form-control p-1 mb-8 rounded-lg text-gray-900">
+				<option value="player">Player</option>
+				<option value="dev">Game Dev</option>
+				<option value="admin">Admin</option>
+				<option value="tech">Technical Support</option>
+			</select>
+		</div>
+		<div class="form-group">
 			<label for="email">Email:</label>
 			<input type="email" id="email" class="form-control" name="email" required pattern=".+@.+\..+"><br><br>
 		</div>

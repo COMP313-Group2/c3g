@@ -27,16 +27,33 @@
     {% endif %}
   {% endwith %}
 
-  <div class="card w-50 mb-3 border-0" style="width: 18rem; margin: auto;">
+	<h1 class="text-4xl text-center">User Page</h1>
+  <div class="card" style="width: 18rem; margin: auto;">
     <div class="card-body">
-			<h1>Upload your WebGL Unity zip file</h1>
-			<p>Enter the game name as game_name</p>
+			<a class="bg-yellow-400 text-gray-900 font-bold py-2 px-4 rounded-lg" href="/logout">Log Out</a>
+		</div>
+	</div>
+	{% if 'user' in session and session['user'] and session['user']['role'] == 'dev' %}
+	<h2 class="text-2xl text-center">Upload your WebGL Unity zip file</h2>
+  <div class="card border-0" style="width: 18rem; margin: auto;">
+    <div class="card-body">
 			<form method="post" action="/user" enctype="multipart/form-data">
-				<input type="file" id="file" name="file">
+				<label for="description">Description of game: </label><br>
+				<input type="text" name="description"> <br>
+				<label for="file">Unity zip file:</label><br>
+				<input class="text-gray-200" type="file" name="file">
 				<input type="submit" value="Submit">
 			</form>
     </div>
   </div>
+	{% endif %}
+	<h2 class="text-2xl text-center">Delete Account</h2>
+  <div class="card" style="width: 18rem; margin: auto;">
+    <div class="card-body">
+			<p>Note: all games and comments will remain</p>
+			<a class="bg-yellow-400 text-gray-900 font-bold py-2 px-4 rounded-lg" href="/delete">Delete Account</a>
+		</div>
+	</div>
 {% endblock %}
 
 {% block footer %}

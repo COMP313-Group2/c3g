@@ -74,7 +74,7 @@ def home_page():
     games = query_db('SELECT * FROM games')
     stars = query_db('SELECT gameId, AVG(star) FROM stars GROUP BY gameId')
     comments = query_db('SELECT * FROM comments ORDER BY date DESC')
-    query = query_db('SELECT games.gameId, gameName, userName, AVG(star) FROM games LEFT OUTER JOIN stars ON games.gameId=stars.gameId INNER JOIN users ON games.userId=users.userId GROUP BY games.gameId ORDER BY AVG(star) DESC')
+    query = query_db('SELECT games.gameId, gameName, description, userName, AVG(star) FROM games LEFT OUTER JOIN stars ON games.gameId=stars.gameId INNER JOIN users ON games.userId=users.userId GROUP BY games.gameId ORDER BY AVG(star) DESC')
     return render_template('index.html', users=users, games=games, stars=stars, comments=comments, query=query)
 
 
@@ -97,8 +97,8 @@ def signup_page():
             and validate('password', '(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}')
             ):
             db = get_db()
-            db.execute('INSERT INTO users (userName, email, password) VALUES (?, ?, ?)',
-                       tuple([request.form[val] for val in ['name', 'email', 'password']]))
+            db.execute('INSERT INTO users (userName, role, email, password) VALUES (?, ?, ?, ?)',
+                       tuple([request.form[val] for val in ['name', 'role', 'email', 'password']]))
             db.commit()
             flash('You have successfully signed up!')
             return redirect('/')
@@ -151,36 +151,17 @@ def user_page():
         elif request.method == 'POST':
             f = request.files['file']
 
-            # f.filename = Blade Runner.zip
-            # filename_snake = blade_runner.zip
-            # folder = Blade Runner
-            # folder_snake = blade_runner
-
-            # filename_snake = re.sub('\s', '_', secure_filename(f.filename.lower()))
-            # folder = re.sub('_', ' ', re.sub('.zip', '', secure_filename(f.filename)))
-            # folder_snake = re.sub('.zip', '', filename_snake) # TODO remove
-
             # NOTE: change base when switching between local and remote development
             base = "/home/hassan/repo/c3g/static/"
             # base = "/home/public/c3g/static/"
 
-            # TODO: replace query_db('SELECT ifnull(max(userId), 0) FROM games;', one=True) to remove [0]
-            game_id = query_db('SELECT ifnull(max(userId), 0) FROM games;')[0]['ifnull(max(userId), 0)'] + 1
+            game_id = query_db('SELECT ifnull(max(userId), 0) FROM games;', one=True)['ifnull(max(userId), 0)'] + 1
 
             f.save(f"{base}{f.filename}")
             shutil.unpack_archive(f"{base}{f.filename}", f"{base}")
             os.remove(f"{base}{f.filename}")
             shutil.move(f"{base}{re.sub('.zip', '', f.filename)}", f"{base}game/{game_id}")
 
-            # replace(f"{base}game/{game_id}/index.html", 
-            #         'TemplateData', 
-            #         # f'static/game/{game_id}/TemplateData')
-            #         f'{game_id}/TemplateData')
-
-            # replace(f"{base}game/{game_id}/index.html", 
-            #         'Build', 
-            #         # f'static/game/{game_id}/Build')
-            #         f'{game_id}/Build')
 
             replace(f"{base}game/{game_id}/index.html", 
                     '<link rel="shortcut icon" href="TemplateData/favicon.ico">',
@@ -212,8 +193,8 @@ def user_page():
 
 
             db = get_db()
-            db.execute('INSERT INTO games (gameId, userId, gameName) VALUES (?, ?, ?)', 
-                    (game_id, session['user']['userId'], re.sub('.zip', '', f.filename)))
+            db.execute('INSERT INTO games (gameId, userId, gameName, description) VALUES (?, ?, ?, ?)', 
+                    (game_id, session['user']['userId'], re.sub('.zip', '', f.filename), request.form['description']))
             db.commit()
 
             flash('You have successfully added a game!')
@@ -230,8 +211,8 @@ def game_page(game_id):
 
 @app.route("/play_game/<int:game_id>")
 def play_game_page(game_id):
-    query = query_db(f'SELECT * FROM games INNER JOIN users ON games.userId=users.userId WHERE games.gameId = {game_id}')
-    comments = query_db(f"SELECT * FROM comments INNER JOIN users WHERE gameId = {game_id} ORDER BY date DESC")
+    query = query_db(f'SELECT * FROM games INNER JOIN users ON games.userId = users.userId WHERE games.gameId = {game_id}')
+    comments = query_db(f'SELECT * FROM comments INNER JOIN users ON comments.userId = users.userId WHERE gameId = {game_id} ORDER BY date DESC')
     return render_template('game.html', query=query, comments=comments)
 
 
@@ -293,10 +274,23 @@ def reset_password_page(user_id):
         flash('Password has been updated!')
         return redirect('/')
 
+
 @app.route("/search", methods=['POST'])
 def search_page():
     if request.method == 'POST':
         q = " OR ".join([f'gameName LIKE "%{x}%"' for x in request.form['search'].split()])
         #query = query_db('SELECT games.gameId, gameName, userName, AVG(star) FROM stars INNER JOIN games ON stars.gameId=games.gameId INNER JOIN users ON games.userId=users.userId WHERE ' + q + ' GROUP BY games.gameId')
-        query = query_db('SELECT games.gameId, gameName, userName, AVG(star) FROM games LEFT OUTER JOIN stars ON games.gameId=stars.gameId INNER JOIN users ON games.userId=users.userId WHERE ' + q + ' GROUP BY games.gameId ORDER BY AVG(star) DESC')
+        query = query_db('SELECT games.gameId, gameName, description, userName, AVG(star) FROM games LEFT OUTER JOIN stars ON games.gameId=stars.gameId INNER JOIN users ON games.userId=users.userId WHERE ' + q + ' GROUP BY games.gameId ORDER BY AVG(star) DESC')
         return render_template('search.html', query=query)
+
+
+@app.route("/delete")
+def delete_page():
+    db = get_db()
+    db.execute(f'DELETE FROM users WHERE userId = {session["user"]["userId"]}')
+    db.commit()
+    session.pop('user', None)
+    flash("Your account has been deleted. We're sad to see you go.")
+    return redirect('/')
+
+

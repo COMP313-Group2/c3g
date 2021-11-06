@@ -23,13 +23,12 @@
   <div class="mx-64" style="">
     <div class="">
       {% if 'user' in session and session['user'] %}
-
 			  <h2 class="title text-3xl text-center mb-10">Welcome to Titan games {{session['user']['userName']}}!</h2>
 			{% else %}
 			  <h2 class="title text-3xl text-center mb-10">Welcome to Titan games!</h2>
       {% endif %}
 			<p class="card-text">The following games are available:<br>
-			Query (<em>SELECT *, AVG(star) FROM stars INNER JOIN games ON stars.gameId=games.gameId INNER JOIN users ON games.userId=users.userId GROUP BY games.gameId</em>): <br> {{query}}. <br> <br>
+			Query (<em>SELECT games.gameId, gameName, userName, AVG(star) FROM games LEFT OUTER JOIN stars ON games.gameId=stars.gameId INNER JOIN users ON games.userId=users.userId GROUP BY games.gameId ORDER BY AVG(star) DESC</em>): <br> {{query}}. <br> <br>
 				Users: {{users}}.  <br> <br>
 				Games: {{games}}.  <br> <br>
 				Stars: {{stars}}.  <br> <br>
@@ -37,58 +36,31 @@
 				You may also upload your own games after signing up.
 			</p>
 
-				<!-- Built-in games: -->
-				<!-- <ul> -->
-				<!-- 	<li> <a href="/space_pong">Space Pong</a> </li> -->
-				<!-- 	<li> <a href="/excaliburs_quest">Excalibur's Quest</a> </li> -->
-				<!-- 	<li> <a href="/potato_tomato">Potato Tomato</a> </li> -->
-				<!-- </ul> -->
-
-				<!-- Dynamically added games: -->
 				<div class="grid grid-cols-3 text-center gap-x-16">
 				{% for item in query %}
 					<a href="/play_game/{{item['gameId']}}">
 						<div class="bg-gradient-to-t from-gray-900 to-gray-800 shadow-outline my-12" style="box-shadow: 0 0 6px 5px rgba(17,24,39,0.9);">
 							<img class="" src="https://www.pixelstalk.net/wp-content/uploads/2016/07/3840x2160-Images-Free-Download-768x432.jpg" alt="">
 							<p class="text-gray-300 text-2xl my-2">{{item['gameName']}}</p>
-							<p class="text-gray-400 text-lg max-w-sm px-9 py-2">First person shooter using a blade gun that includes a teleporting functionality</p>
+							<p class="text-gray-400 text-lg max-w-sm px-9 py-2">{{item['description']}}</p>
 							<p class="text-lg text-gray-500 italic">By: {{item['userName']}}</p>
 							<p>
-							{% for star in stars %}
-								{% if star['gameId'] == item['gameId'] %}
-									{% for i in range(star['AVG(star)'] | int()) %}
-										<span class="fa fa-star text-yellow-300"></span>
-									{% endfor %}
-									{{star['AVG(star)']}}
-								{% endif %}
+
+							{% for i in range(item['AVG(star)'] | int()) %}
+								<span class="fa fa-star text-yellow-300"></span>
 							{% endfor %}
+							{% if item['AVG(star)'] == None %}
+								No Stars
+							{% else %}
+								{{item['AVG(star)']}}
+							{% endif%}
+
 							</p>
-							<!-- <div class="text-gray-500 text-xs flex p-1 font-semibold justify-center my-1"> -->
-							<!-- 	<span class="mr-1 p-1 px-2 font-bold">105 Watching</span> -->
-							<!-- 	<span class="mr-1 p-1 px-2 font-bold border-l border-gray-700">105 Likes</span> -->
-							<!-- 	<span class="mr-1 p-1 px-2 font-bold border-l border-gray-700">105 Dislikes</span> -->
-							<!-- 	<span class="fa fa-star text-yellow-300"></span> -->
-							<!-- 	<span class="fa fa-star text-yellow-300"></span> -->
-							<!-- 	<span class="fa fa-star text-yellow-300"></span> -->
-							<!-- 	<span class="fa fa-star text-yellow-300"></span> -->
-							<!-- 	<span class="fa fa-star text-gray-300"></span> -->
-							<!-- </div> -->
 						</div>
 					</a>
 				{% endfor %}
 				</div>
 
-      <!-- <div class="text-center"> -->
-      <!--     {% if 'user' in session and session['user'] %} -->
-      <!--     <a href="logout" class="btn btn-warning">Logout</a> -->
-      <!--     {% else %} -->
-      <!--     <a href="signup" class="btn btn-success">Sign Up</a> -->
-      <!--     <a href="signin" class="btn btn-primary">Sign In</a> -->
-
-      <!--     {{user}} -->
-      <!--     {% endif %} -->
-
-      <!-- </div> -->
     </div>
   </div>
 {% endblock %}
