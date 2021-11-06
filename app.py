@@ -10,6 +10,8 @@ import os
 import fileinput
 import sys
 import yagmail
+import unittest
+
 
 app = Flask(__name__, static_url_path='')
 app.secret_key = b'148c8959c6ba9202c4d6a018d90554f53023a862f9e7ce136a6e30a6700e753c'
@@ -61,7 +63,7 @@ def init_db():
         db.commit()
 
 
-# init_db()
+init_db()
 
 
 
@@ -70,6 +72,7 @@ def init_db():
 
 @app.route("/")
 def home_page():
+    """Display the home page"""
     users = query_db('SELECT * FROM users')
     games = query_db('SELECT * FROM games')
     stars = query_db('SELECT gameId, AVG(star) FROM stars GROUP BY gameId')
@@ -78,16 +81,16 @@ def home_page():
     return render_template('index.html', users=users, games=games, stars=stars, comments=comments, query=query)
 
 
-# Validate data format is correct
 def validate(text, pattern):
+    """Validate data format is correct"""
     regex = re.compile(pattern, re.I)
     match = regex.match(request.form[text])
     return bool(match)
 
 
-# Show signup form and process and save returned form data
 @app.route('/signup', methods=['GET', 'POST'])
 def signup_page():
+    """Allow the user to both see the signup form and signup"""
     if request.method == 'GET':
         return render_template('signup.html')
 
@@ -107,9 +110,9 @@ def signup_page():
             return redirect('/')
 
 
-# Show signin form and return user if found
 @app.route('/signin', methods=['GET', 'POST'])
 def signin_page():
+    """Allow the user to both see the signin form and signin"""
     if request.method == 'GET':
         return render_template('signin.html')
 
@@ -133,18 +136,21 @@ def signin_page():
 
 @app.route('/logout')
 def logout_page():
+    """Remove the user from being the currently logged on user"""
     session.pop('user', None)
     flash('You have successfully logged out')
     return redirect('/')
 
 def replace(file, previousw, nextw):
-   for line in fileinput.input(file, inplace=1):
-       line = line.replace(previousw, nextw)
-       sys.stdout.write(line)
+    """Helper function for /user to modify uploaded files"""
+    for line in fileinput.input(file, inplace=1):
+        line = line.replace(previousw, nextw)
+        sys.stdout.write(line)
 
 
 @app.route('/user', methods=['GET', 'POST'])
 def user_page():
+    """Allow user to modify personal settings and to upload games to the server"""
     if 'user' in session and session['user']:
         if request.method == 'GET':
             return render_template('user.html')
@@ -152,8 +158,8 @@ def user_page():
             f = request.files['file']
 
             # NOTE: change base when switching between local and remote development
-            base = "/home/hassan/repo/c3g/static/"
-            # base = "/home/public/c3g/static/"
+            # base = "/home/hassan/repo/c3g/static/"
+            base = "/home/public/c3g/static/"
 
             game_id = query_db('SELECT ifnull(max(userId), 0) FROM games;', one=True)['ifnull(max(userId), 0)'] + 1
 
@@ -205,12 +211,14 @@ def user_page():
 
 
 @app.route("/game/<int:game_id>")
-def game_page(game_id):
+def game_page_api(game_id):
+    """Send the index file (includes only iframe)"""
     return send_file(f'static/game/{game_id}/index.html')
 
 
 @app.route("/play_game/<int:game_id>")
 def play_game_page(game_id):
+    """Send the complete webpage with iframe of game"""
     query = query_db(f'SELECT * FROM games INNER JOIN users ON games.userId = users.userId WHERE games.gameId = {game_id}')
     comments = query_db(f'SELECT * FROM comments INNER JOIN users ON comments.userId = users.userId WHERE gameId = {game_id} ORDER BY date DESC')
     return render_template('game.html', query=query, comments=comments)
@@ -218,6 +226,7 @@ def play_game_page(game_id):
 
 @app.route("/rate_game/<int:game_id>/<int:star>", methods=['POST'])
 def rate_game_api(game_id, star):
+    """Allow user to rate a particular game with a value"""
     if 'user' in session and session['user']:
         query = query_db(f'SELECT * FROM stars WHERE userId = {session["user"]["userId"]} AND gameId = {game_id}')
         if query != []:
@@ -238,6 +247,7 @@ def rate_game_api(game_id, star):
 
 @app.route("/comment_game/<int:game_id>", methods=['POST'])
 def comment_game_api(game_id):
+    """Allow the user to comment on a particular game"""
     if 'user' in session and session['user']:
         db = get_db()
         db.execute('INSERT INTO comments (userId, gameId, comment) VALUES (?, ?, ?)', 
@@ -250,6 +260,7 @@ def comment_game_api(game_id):
 
 @app.route("/forgot_password", methods=['GET', 'POST'])
 def forgot_password_page():
+    """Allow the user to change a forgotten password"""
     if request.method == 'GET':
         return render_template('forgot_password.html')
 
@@ -264,6 +275,7 @@ def forgot_password_page():
 
 @app.route("/reset_password/<int:user_id>", methods=['GET', 'POST'])
 def reset_password_page(user_id):
+    """Reset password based on forgotten password link"""
     if request.method == 'GET':
         return render_template('reset_password.html', user_id=user_id)
 
@@ -277,15 +289,16 @@ def reset_password_page(user_id):
 
 @app.route("/search", methods=['POST'])
 def search_page():
+    """Allow the user to search for a particular game"""
     if request.method == 'POST':
         q = " OR ".join([f'gameName LIKE "%{x}%"' for x in request.form['search'].split()])
-        #query = query_db('SELECT games.gameId, gameName, userName, AVG(star) FROM stars INNER JOIN games ON stars.gameId=games.gameId INNER JOIN users ON games.userId=users.userId WHERE ' + q + ' GROUP BY games.gameId')
         query = query_db('SELECT games.gameId, gameName, description, userName, AVG(star) FROM games LEFT OUTER JOIN stars ON games.gameId=stars.gameId INNER JOIN users ON games.userId=users.userId WHERE ' + q + ' GROUP BY games.gameId ORDER BY AVG(star) DESC')
         return render_template('search.html', query=query)
 
 
 @app.route("/delete")
 def delete_page():
+    """Allow the user to delete their account"""
     db = get_db()
     db.execute(f'DELETE FROM users WHERE userId = {session["user"]["userId"]}')
     db.commit()
@@ -294,3 +307,59 @@ def delete_page():
     return redirect('/')
 
 
+class Tests(unittest.TestCase):
+    def query_db(string):
+        con = sqlite3.connect("database.db")
+        cur = con.cursor()
+        x = [row for row in cur.execute(string)]
+        con.close()
+        return x
+
+    def test_password(self):
+        regex = re.compile('(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}', re.I)
+        match = regex.match('Password0)')
+        self.assertTrue(bool(match))
+
+    def test_db_empty(self):
+        init_db() # reset db
+        users = Tests.query_db('SELECT * FROM users;')
+        self.assertEqual(users, [])
+        games = Tests.query_db('SELECT * FROM games;')
+        self.assertEqual(games, [])
+
+
+    def test_db_insert(self):
+        init_db() # reset db
+        con = sqlite3.connect("database.db")
+        cur = con.cursor()
+        cur.execute('INSERT INTO users values (1,"hassan","dev","hassan@gmail.com","Password0)")')
+        con.commit()
+        users = Tests.query_db('SELECT * FROM users')
+        self.assertEqual(len(users), 1)
+
+    def test_db_average_stars(self):
+        init_db() # reset db
+        con = sqlite3.connect("database.db")
+        cur = con.cursor()
+        cur.execute('INSERT INTO stars (userId, gameId, star) values (1,1,5)')
+        cur.execute('INSERT INTO stars (userId, gameId, star) values (2,1,4)')
+        cur.execute('INSERT INTO stars (userId, gameId, star) values (3,2,1)')
+        con.commit()
+        stars = Tests.query_db('SELECT AVG(star) FROM stars GROUP BY gameId')
+        self.assertEqual(stars[0][0], 4.5)
+
+    def test_db_update_stars(self):
+        init_db() # reset db
+        con = sqlite3.connect("database.db")
+        cur = con.cursor()
+        cur.execute('INSERT INTO users values (1, "hassan", "dev", "hassan@gmail.com", "Password0)")')
+        cur.execute('INSERT INTO games values (1, 1, "Space Pong", "Pong, with a space theme")')
+        con.commit()
+        join = Tests.query_db(f'SELECT * FROM games INNER JOIN users ON games.userId = users.userId')
+        self.assertEqual(join[0][2], "Space Pong")
+        self.assertEqual(join[0][5], "hassan")
+
+
+# Run the unit tests if called using python3 app.py
+if __name__ == '__main__':
+    unittest.main()
