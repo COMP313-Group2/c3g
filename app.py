@@ -158,8 +158,8 @@ def user_page():
             f = request.files['file']
 
             # NOTE: change base when switching between local and remote development
-            # base = "/home/hassan/repo/c3g/static/"
-            base = "/home/public/c3g/static/"
+            base = "/home/hassan/repo/c3g/static/"
+            # base = "/home/public/c3g/static/"
 
             game_id = query_db('SELECT ifnull(max(userId), 0) FROM games;', one=True)['ifnull(max(userId), 0)'] + 1
 
@@ -348,7 +348,7 @@ class Tests(unittest.TestCase):
         stars = Tests.query_db('SELECT AVG(star) FROM stars GROUP BY gameId')
         self.assertEqual(stars[0][0], 4.5)
 
-    def test_db_update_stars(self):
+    def test_db_join(self):
         init_db() # reset db
         con = sqlite3.connect("database.db")
         cur = con.cursor()
