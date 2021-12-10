@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Unity WebGL Player | Space Pong</title>
+    <link rel="shortcut icon" href="1/TemplateData/favicon.ico">
+    <link rel="stylesheet" href="1/TemplateData/style.css">
+    <script src="1/TemplateData/UnityProgress.js"></script>  
+    <script src="1/Build/UnityLoader.js"></script>
+    <script>
+      var gameInstance = UnityLoader.instantiate("gameContainer", "1/Build/Space Pong.json", {onProgress: UnityProgress});
+    </script>
+  </head>
+  <body>
+    <div class="webgl-content">
+      <div id="gameContainer" style="width: 640px; height: 360px"></div>
+      <div class="footer">
+        <div class="webgl-logo"></div>
+        <div class="fullscreen" onclick="gameInstance.SetFullscreen(1)"></div>
+        <div class="title">Space Pong</div>
+      </div>
+    </div>
+  </body>
+</html>

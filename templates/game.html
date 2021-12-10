@@ -1,6 +1,13 @@
 {% extends "base.html" %}
 
-{% block title %}{{query[0]['gameName']}}{% endblock %}
+
+{% block title %}
+	{% if query == [] %}
+		Game Not Available 
+	{% else %} 
+		{{query[0]['gameName']}}
+	{% endif %}
+{% endblock %}
 
 {% block head %}
   {{ super() }}
@@ -19,7 +26,17 @@
     {% endif %}
   {% endwith %}
 
+	<div>
+		Query: {{query}} <br>
+		Comments: {{comments}}
+	</div>
+
 	<iframe name="useless" style="display:none;"></iframe>
+  {% if query == [] %}
+	<div class="flex flex-col items-center">
+		<h2 class="title text-3xl text-center mb-10">Game Not Available</h2>
+	</div>
+	{% else %}
   {% with item = query[0] %}
 	<div class="flex flex-col items-center">
 		<h2 class="title text-3xl text-center mb-10">{{item['gameName']}}</h2>
@@ -61,14 +78,28 @@
 			</div>
 		{% endif %}
 		{% for comment in comments %}
+			{% if comment['reply'] == 1 %}
+			<div class="pl-10">
+			{% else %}
 			<div>
-				<p>{{comment['userName']}} commented on {{comment['date']}}:</p>
-				<p>{{comment['comment']}}</p>
+			{% endif %}
+				<p>{{comment['userName']}} commented on {{comment['adate']}}:</p>
+				<p>{{comment['acomment']}}</p>
 			</div>
+			{% if comment['reply'] == 0 %}
+			<form class="grid pb-10" method="post" action="/reply/{{comment['acommentId']}}">
+				<div class="inline form-group justify-end text-right">
+					<label for="reply">Reply:</label>
+					<textarea class="form-control rounded-lg text-black p-2" id="reply" name="reply" rows="1" cols="30"></textarea>
+				<input type="submit" value="Submit">
+				</div>
+			</form>
+			{% endif %}
 		{% endfor %}
 		</div>
 	</div>
 	{% endwith %}
+	{% endif %}
 
 
 

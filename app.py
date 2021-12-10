@@ -63,7 +63,7 @@ def init_db():
         db.commit()
 
 
-init_db()
+# init_db()
 
 
 
@@ -77,7 +77,7 @@ def home_page():
     games = query_db('SELECT * FROM games')
     stars = query_db('SELECT gameId, AVG(star) FROM stars GROUP BY gameId')
     comments = query_db('SELECT * FROM comments ORDER BY date DESC')
-    query = query_db('SELECT games.gameId, gameName, description, userName, AVG(star) FROM games LEFT OUTER JOIN stars ON games.gameId=stars.gameId INNER JOIN users ON games.userId=users.userId GROUP BY games.gameId ORDER BY AVG(star) DESC')
+    query = query_db('SELECT games.gameId, gameName, imageName, description, userName, AVG(star) FROM games LEFT OUTER JOIN stars ON games.gameId=stars.gameId INNER JOIN users ON games.userId=users.userId WHERE status = 0 GROUP BY games.gameId ORDER BY AVG(star) DESC')
     return render_template('index.html', users=users, games=games, stars=stars, comments=comments, query=query)
 
 
@@ -120,7 +120,7 @@ def signin_page():
         if (validate('email', '.+\@.+\..+')
             and validate('password', '(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}')
             ):
-            user = query_db('SELECT * FROM users WHERE email = ? AND password = ?',
+            user = query_db('SELECT * FROM users WHERE email = ? AND password = ? AND deleted = 0',
                             (request.form['email'], request.form['password']), one=True)
             if user is None:
                 flash('User does not exist')
@@ -153,7 +153,21 @@ def user_page():
     """Allow user to modify personal settings and to upload games to the server"""
     if 'user' in session and session['user']:
         if request.method == 'GET':
-            return render_template('user.html')
+            if session['user']['role'] == 'admin': # Accept games
+                games = query_db('SELECT * FROM games INNER JOIN users ON games.userId = users.userId WHERE status = 2')
+                comments = query_db('SELECT commentId, date, comment, userName FROM comments JOIN users ON comments.userId = users.userId AND deleted = 0 AND date > (SELECT date FROM admin WHERE userId = 1) ORDER BY date DESC')
+                users = query_db('SELECT userId, userName FROM users WHERE deleted = 0 AND role IN ("dev", "player")')
+
+
+                db = get_db()
+                db.execute('INSERT INTO admin (userId) VALUES (?) ON CONFLICT DO UPDATE SET date = CURRENT_TIMESTAMP WHERE userId = ?', (session['user']['userId'], session['user']['userId']))
+                db.commit()
+                return render_template('user.html', games=games, comments=comments, users=users)
+
+            else: # dev sees uploaded and either public or private games
+                games = query_db(f'SELECT * FROM games WHERE status IN (0,2) AND userId = {session["user"]["userId"]}')
+                return render_template('user.html', games=games)
+
         elif request.method == 'POST':
             f = request.files['file']
 
@@ -161,7 +175,7 @@ def user_page():
             base = "/home/hassan/repo/c3g/static/"
             # base = "/home/public/c3g/static/"
 
-            game_id = query_db('SELECT ifnull(max(userId), 0) FROM games;', one=True)['ifnull(max(userId), 0)'] + 1
+            game_id = query_db('SELECT ifnull(max(gameId), 0) FROM games;', one=True)['ifnull(max(gameId), 0)'] + 1
 
             f.save(f"{base}{f.filename}")
             shutil.unpack_archive(f"{base}{f.filename}", f"{base}")
@@ -197,10 +211,12 @@ def user_page():
                     'var buildUrl = "Build";',
                     f'var buildUrl = "{game_id}/Build";')
 
+            img = request.files['image']
+            img.save(f"{base}game/{game_id}/{img.filename}")
 
             db = get_db()
-            db.execute('INSERT INTO games (gameId, userId, gameName, description) VALUES (?, ?, ?, ?)', 
-                    (game_id, session['user']['userId'], re.sub('.zip', '', f.filename), request.form['description']))
+            db.execute('INSERT INTO games (gameId, userId, gameName, imageName, description) VALUES (?, ?, ?, ?, ?)', 
+                    (game_id, session['user']['userId'], re.sub('.zip', '', f.filename), img.filename, request.form['description']))
             db.commit()
 
             flash('You have successfully added a game!')
@@ -219,8 +235,12 @@ def game_page_api(game_id):
 @app.route("/play_game/<int:game_id>")
 def play_game_page(game_id):
     """Send the complete webpage with iframe of game"""
-    query = query_db(f'SELECT * FROM games INNER JOIN users ON games.userId = users.userId WHERE games.gameId = {game_id}')
-    comments = query_db(f'SELECT * FROM comments INNER JOIN users ON comments.userId = users.userId WHERE gameId = {game_id} ORDER BY date DESC')
+    if 'user' in session and session['user'] and session['user']['role'] == 'admin':
+        query = query_db(f'SELECT * FROM games INNER JOIN users ON games.userId = users.userId WHERE games.gameId = {game_id}')
+    else:
+        query = query_db(f'SELECT * FROM games INNER JOIN users ON games.userId = users.userId WHERE games.gameId = {game_id} AND (status = 0 OR (status = 2 AND games.userId = {session["user"]["userId"]}))')
+    comments = query_db(f'SELECT a.commentId AS acommentId, userName, a.date AS adate, a.comment AS acomment, a.commentIdRef, ifnull(a.commentIdRef, a.commentId), ifnull(a.commentIdRef, a.commentId) <> a.commentId AS reply, CASE WHEN a.commentIdRef IS NULL THEN a.commentId WHEN a.commentIdRef IS NOT NULL THEN ifnull((SELECT commentIdRef FROM comments WHERE commentId = a.commentIdRef), a.commentIdRef) END AS cs FROM comments AS a LEFT OUTER JOIN comments AS b ON a.commentIdRef = b.commentId JOIN users on users.userId = a.userId WHERE a.gameId = {game_id} ORDER BY cs')
+
     return render_template('game.html', query=query, comments=comments)
 
 
@@ -255,7 +275,22 @@ def comment_game_api(game_id):
         db.commit()
         return redirect(f'/play_game/{game_id}')
     else:
-        return "You must be logged in to rate a game", 500
+        return "You must be logged in to comment on a game", 500
+
+@app.route("/reply/<int:comment_id>", methods=['POST'])
+def reply_api(comment_id):
+    """Allow the user to reply to a particular comment"""
+    if 'user' in session and session['user']:
+        game_id = query_db(f'SELECT gameId FROM comments WHERE commentId = {comment_id}', one=True)['gameId']
+
+        db = get_db()
+        db.execute('INSERT INTO comments (userId, gameId, comment, commentIdRef) VALUES (?, ?, ?, ?)', 
+                (session['user']['userId'], game_id, request.form['reply'], comment_id))
+        db.commit()
+
+        return redirect(f'/play_game/{game_id}')
+    else:
+        return "You must be logged in to reply to a comment", 500
 
 
 @app.route("/forgot_password", methods=['GET', 'POST'])
@@ -296,15 +331,57 @@ def search_page():
         return render_template('search.html', query=query)
 
 
-@app.route("/delete")
-def delete_page():
+@app.route("/delete_user")
+def delete_user_page():
     """Allow the user to delete their account"""
     db = get_db()
-    db.execute(f'DELETE FROM users WHERE userId = {session["user"]["userId"]}')
+    db.execute(f'UPDATE users SET deleted = 1 WHERE userId = {session["user"]["userId"]}')
     db.commit()
     session.pop('user', None)
     flash("Your account has been deleted. We're sad to see you go.")
     return redirect('/')
+
+
+@app.route("/delete_user/<int:user_id>")
+def delete_userid_page(user_id):
+    """Allow an admin to delete a user's account"""
+    db = get_db()
+    db.execute(f'UPDATE users SET deleted = 1 WHERE userId = {user_id}')
+    db.commit()
+    name = query_db(f'SELECT userName FROM users WHERE userId = {user_id}', one=True)['userName']
+    flash(f"You have deleted {name}'s account.")
+    return redirect('/user')
+
+
+@app.route("/delete_game/<int:game_id>")
+def delete_game_page(game_id):
+    """Allow the user to delete their own games"""
+    db = get_db()
+    db.execute(f'UPDATE games SET status = 1 WHERE gameId = {game_id} AND userId = {session["user"]["userId"]}')
+    db.commit()
+    flash("Your game has been deleted.")
+    return redirect('/')
+
+
+@app.route("/delete_comment/<int:comment_id>")
+def delete_comment_page(comment_id):
+    """Allow the admin to delete anyone's comments"""
+    db = get_db()
+    db.execute(f'DELETE FROM comments WHERE commentId = {comment_id} OR commentIdRef = {comment_id}')
+    db.commit()
+    flash("A comment has been deleted.")
+    return redirect('/user')
+
+
+@app.route("/accept_game/<int:game_id>")
+def accept_game_page(game_id):
+    """Allow the admin to accept a dev's games"""
+    db = get_db()
+    db.execute(f'UPDATE games SET status = 0 WHERE gameId = {game_id}')
+    db.commit()
+    dev_name = query_db('SELECT userName FROM games INNER JOIN users ON games.userId = users.userId')[0]['userName']
+    flash(f"You have accepted {dev_name}'s game.")
+    return redirect('/user')
 
 
 class Tests(unittest.TestCase):

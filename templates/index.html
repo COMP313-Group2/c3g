@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Index{% endblock %}
+{% block title %}Titan Games{% endblock %}
 
 {% block head %}
   {{ super() }}
@@ -33,14 +33,15 @@
 				Games: {{games}}.  <br> <br>
 				Stars: {{stars}}.  <br> <br>
 				Comments: {{comments}}.  <br> <br>
-				You may also upload your own games after signing up.
+				You may also upload your own games after signing up.<br><br>
+				<a class="underline" href="/forgot_password">Click here if you forgot your password.</a>
 			</p>
 
 				<div class="grid grid-cols-3 text-center gap-x-16">
 				{% for item in query %}
 					<a href="/play_game/{{item['gameId']}}">
 						<div class="bg-gradient-to-t from-gray-900 to-gray-800 shadow-outline my-12" style="box-shadow: 0 0 6px 5px rgba(17,24,39,0.9);">
-							<img class="" src="https://www.pixelstalk.net/wp-content/uploads/2016/07/3840x2160-Images-Free-Download-768x432.jpg" alt="">
+							<img class="" src="{{'/game/' + item['gameId']|string + '/' + item['imageName']}}" alt="">
 							<p class="text-gray-300 text-2xl my-2">{{item['gameName']}}</p>
 							<p class="text-gray-400 text-lg max-w-sm px-9 py-2">{{item['description']}}</p>
 							<p class="text-lg text-gray-500 italic">By: {{item['userName']}}</p>
@@ -61,7 +62,6 @@
 				{% endfor %}
 
 
-				<a class="underline" href="/forgot_password">Click here if you forgot your password.</a>
 				</div>
 
     </div>
