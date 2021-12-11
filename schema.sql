@@ -12,7 +12,8 @@ CREATE TABLE users (
 	role TEXT NOT NULL,
   email TEXT UNIQUE NOT NULL,
   password TEXT NOT NULL,
-	deleted BOOLEAN NOT NULL CHECK (deleted IN (0,1)) DEFAULT 0
+	deleted BOOLEAN NOT NULL CHECK (deleted IN (0,1)) DEFAULT 0,
+	country TEXT NOT NULL
 );
 
 CREATE TABLE admin (
@@ -80,16 +81,16 @@ CREATE TABLE comments (
 
 
 -- Default values for system users
-INSERT INTO users (userName, role, email, password) 
-	VALUES ('admin', 'admin', 'admin@gmail.com', 'Password0)');
-INSERT INTO users (userName, role, email, password) 
-	VALUES ('tech', 'tech', 'tech@gmail.com', 'Password0)');
+INSERT INTO users (userName, role, email, password, country) 
+	VALUES ('admin', 'admin', 'admin@gmail.com', 'Password0)', 'CA');
+INSERT INTO users (userName, role, email, password, country) 
+	VALUES ('tech', 'tech', 'tech@gmail.com', 'Password0)', 'CA');
 
 -- Testing values
-INSERT INTO users (userName, role, email, password) 
-	VALUES ('Hassan Shabbir', 'dev', 'hassan149367@gmail.com', 'Password0)');
-INSERT INTO users (userName, role, email, password) 
-	VALUES ('Sarmad', 'player', 'sarmad@gmail.com', 'Password0)');
+INSERT INTO users (userName, role, email, password, country) 
+	VALUES ('Hassan Shabbir', 'dev', 'hassan149367@gmail.com', 'Password0)', 'CA');
+INSERT INTO users (userName, role, email, password, country) 
+	VALUES ('Sarmad', 'player', 'sarmad@gmail.com', 'Password0)', 'CA');
 
 
 /* insert into users (userId, userName, role, email, password) values (1, "hassan", "player", "hassan@gmail.com", "Password0)"); */

@@ -26,11 +26,6 @@
     {% endif %}
   {% endwith %}
 
-	<div>
-		Query: {{query}} <br>
-		Comments: {{comments}}
-	</div>
-
 	<iframe name="useless" style="display:none;"></iframe>
   {% if query == [] %}
 	<div class="flex flex-col items-center">
@@ -41,7 +36,7 @@
 	<div class="flex flex-col items-center">
 		<h2 class="title text-3xl text-center mb-10">{{item['gameName']}}</h2>
 		<iframe src="/game/{{item['gameId']}}" height="650" width="960"></iframe>
-		<p class="mt-9 text-lg text-gray-500 italic">By: {{item['userName']}}</p>
+		<p class="text-lg text-gray-500"><em class="italic">By: {{item['userName']}}</em> {{item['flag']}}</p>
 		{% if 'user' in session and session['user'] %}
 		<div>
 			<p>Rate this game!</p>
@@ -83,7 +78,7 @@
 			{% else %}
 			<div>
 			{% endif %}
-				<p>{{comment['userName']}} commented on {{comment['adate']}}:</p>
+				<p>{{comment['userName']}} {{comment['flag']}} commented on {{comment['adate']}}:</p>
 				<p>{{comment['acomment']}}</p>
 			</div>
 			{% if comment['reply'] == 0 %}

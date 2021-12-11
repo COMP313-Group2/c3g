@@ -49,6 +49,14 @@
 			</form>
     </div>
   </div>
+
+	<h2 class="text-2xl text-center pt-8">Send Support Ticket</h2>
+	<form style="width: 30rem; margin: auto;" method="post" action="/ticket">
+		<div class="form-group text-center">
+			<textarea class="form-control rounded-lg text-black p-2 mt-6" id="ticket" name="ticket" rows="4" cols="50"></textarea>
+			<input class="mt-3" type="submit" value="Submit">
+		</div>
+	</form>
 	<h2 class="text-2xl text-center pt-8">Delete Games</h2>
   <div class="border-0 pt-6" style="width: 30rem; margin: auto;">
     <div class="text-center">
@@ -89,12 +97,12 @@
 		{% endfor %}
   </div>
 	<h2 class="text-2xl text-center pt-8">Ban Users</h2>
-  <div class="border-0 pt-6" style="width: 30rem; margin: auto;">
+  <div class="border-0 pt-6" style="width: 10rem; margin: auto;">
 		{% if users == [] %}
 			<p>There are no users.</p>
 		{% endif %}
 		{% for user in users %}
-			<p class="pb-3">{{user.userName}}</p>
+			<p class="pb-3">{{user.userName}} {{user.flag}}</p>
 			<p class="pb-10"><a class="mt-8 bg-yellow-400 text-gray-900 font-bold py-2 px-4 rounded-lg" href="/delete_user/{{user.userId}}">Ban User</a></p>
 		{% endfor %}
   </div>

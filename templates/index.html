@@ -44,7 +44,7 @@
 							<img class="" src="{{'/game/' + item['gameId']|string + '/' + item['imageName']}}" alt="">
 							<p class="text-gray-300 text-2xl my-2">{{item['gameName']}}</p>
 							<p class="text-gray-400 text-lg max-w-sm px-9 py-2">{{item['description']}}</p>
-							<p class="text-lg text-gray-500 italic">By: {{item['userName']}}</p>
+							<p class="text-lg text-gray-500"><em class="italic">By: {{item['userName']}}</em> {{item['flag']}}</p>
 							<p>
 
 							{% for i in range(item['AVG(star)'] | int()) %}

@@ -11,6 +11,7 @@ import fileinput
 import sys
 import yagmail
 import unittest
+import requests
 
 
 app = Flask(__name__, static_url_path='')
@@ -74,10 +75,12 @@ def init_db():
 def home_page():
     """Display the home page"""
     users = query_db('SELECT * FROM users')
+    country_to_flag(users)
     games = query_db('SELECT * FROM games')
     stars = query_db('SELECT gameId, AVG(star) FROM stars GROUP BY gameId')
     comments = query_db('SELECT * FROM comments ORDER BY date DESC')
-    query = query_db('SELECT games.gameId, gameName, imageName, description, userName, AVG(star) FROM games LEFT OUTER JOIN stars ON games.gameId=stars.gameId INNER JOIN users ON games.userId=users.userId WHERE status = 0 GROUP BY games.gameId ORDER BY AVG(star) DESC')
+    query = query_db('SELECT games.gameId, gameName, imageName, description, userName, country, AVG(star) FROM games LEFT OUTER JOIN stars ON games.gameId=stars.gameId INNER JOIN users ON games.userId=users.userId WHERE status = 0 GROUP BY games.gameId ORDER BY AVG(star) DESC')
+    country_to_flag(query)
     return render_template('index.html', users=users, games=games, stars=stars, comments=comments, query=query)
 
 
@@ -99,9 +102,11 @@ def signup_page():
             and validate('email', '.+\@.+\..+')
             and validate('password', '(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}')
             ):
+            country = requests.get('https://api.ipregistry.co/?key=nmet7lc1w8mdax43&fields=location.country.code').json()['location']['country']['code']
+
             db = get_db()
-            db.execute('INSERT INTO users (userName, role, email, password) VALUES (?, ?, ?, ?)',
-                       tuple([request.form[val] for val in ['name', 'role', 'email', 'password']]))
+            db.execute(f'INSERT INTO users (userName, role, email, password, country) VALUES (?, ?, ?, ?, ?)',
+                       tuple([request.form[val] for val in ['name', 'role', 'email', 'password']] + [country]))
             db.commit()
             flash('You have successfully signed up!')
             return redirect('/')
@@ -147,6 +152,12 @@ def replace(file, previousw, nextw):
         line = line.replace(previousw, nextw)
         sys.stdout.write(line)
 
+def country_to_flag(users):
+    """Helper function to convert from country codes to unicode flags"""
+    letters  = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    unicodes = '🇦🇧🇨🇩🇪🇫🇬🇭🇮🇯🇰🇱🇲🇳🇴🇵🇶🇷🇸🇹🇺🇻🇼🇽🇾🇿' # may not display correctly in editor
+    for user in users:
+        user['flag'] = ''.join([ unicodes[letters.index(c)] for c in user['country'] ])
 
 @app.route('/user', methods=['GET', 'POST'])
 def user_page():
@@ -156,8 +167,8 @@ def user_page():
             if session['user']['role'] == 'admin': # Accept games
                 games = query_db('SELECT * FROM games INNER JOIN users ON games.userId = users.userId WHERE status = 2')
                 comments = query_db('SELECT commentId, date, comment, userName FROM comments JOIN users ON comments.userId = users.userId AND deleted = 0 AND date > (SELECT date FROM admin WHERE userId = 1) ORDER BY date DESC')
-                users = query_db('SELECT userId, userName FROM users WHERE deleted = 0 AND role IN ("dev", "player")')
-
+                users = query_db('SELECT userId, userName, country FROM users WHERE deleted = 0 AND role IN ("dev", "player")')
+                country_to_flag(users)
 
                 db = get_db()
                 db.execute('INSERT INTO admin (userId) VALUES (?) ON CONFLICT DO UPDATE SET date = CURRENT_TIMESTAMP WHERE userId = ?', (session['user']['userId'], session['user']['userId']))
@@ -226,6 +237,19 @@ def user_page():
         return render_template('index.html')
 
 
+@app.route("/ticket", methods=['POST'])
+def ticket():
+    """Create a ticket to send to the tech support"""
+    if 'user' in session and session['user']:
+        db = get_db()
+        db.execute('INSERT INTO comments (userId, gameId, comment) VALUES (?, ?, ?)', 
+                (session['user']['userId'], game_id, request.form['comment']))
+        db.commit()
+        return redirect(f'/play_game/{game_id}')
+    else:
+        return "You must be logged in to comment on a game", 500
+
+
 @app.route("/game/<int:game_id>")
 def game_page_api(game_id):
     """Send the index file (includes only iframe)"""
@@ -239,7 +263,11 @@ def play_game_page(game_id):
         query = query_db(f'SELECT * FROM games INNER JOIN users ON games.userId = users.userId WHERE games.gameId = {game_id}')
     else:
         query = query_db(f'SELECT * FROM games INNER JOIN users ON games.userId = users.userId WHERE games.gameId = {game_id} AND (status = 0 OR (status = 2 AND games.userId = {session["user"]["userId"]}))')
-    comments = query_db(f'SELECT a.commentId AS acommentId, userName, a.date AS adate, a.comment AS acomment, a.commentIdRef, ifnull(a.commentIdRef, a.commentId), ifnull(a.commentIdRef, a.commentId) <> a.commentId AS reply, CASE WHEN a.commentIdRef IS NULL THEN a.commentId WHEN a.commentIdRef IS NOT NULL THEN ifnull((SELECT commentIdRef FROM comments WHERE commentId = a.commentIdRef), a.commentIdRef) END AS cs FROM comments AS a LEFT OUTER JOIN comments AS b ON a.commentIdRef = b.commentId JOIN users on users.userId = a.userId WHERE a.gameId = {game_id} ORDER BY cs')
+
+    comments = query_db(f'SELECT a.commentId AS acommentId, userName, country, a.date AS adate, a.comment AS acomment, a.commentIdRef, ifnull(a.commentIdRef, a.commentId), ifnull(a.commentIdRef, a.commentId) <> a.commentId AS reply, CASE WHEN a.commentIdRef IS NULL THEN a.commentId WHEN a.commentIdRef IS NOT NULL THEN ifnull((SELECT commentIdRef FROM comments WHERE commentId = a.commentIdRef), a.commentIdRef) END AS cs FROM comments AS a LEFT OUTER JOIN comments AS b ON a.commentIdRef = b.commentId JOIN users on users.userId = a.userId WHERE a.gameId = {game_id} ORDER BY cs')
+
+    country_to_flag(comments)
+    country_to_flag(query)
 
     return render_template('game.html', query=query, comments=comments)
 
