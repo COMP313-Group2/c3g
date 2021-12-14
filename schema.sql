@@ -60,7 +60,7 @@ CREATE TABLE tickets (
 	comment TEXT,
 	resolved BOOLEAN NOT NULL CHECK (resolved IN (0,1)) DEFAULT 0,
 	ticketIdRef INTEGER,
-  FOREIGN KEY(ticketsIdRef) REFERENCES tickets(ticketsIdRef) ON DELETE CASCADE,
+  FOREIGN KEY(ticketIdRef) REFERENCES tickets(ticketIdRef) ON DELETE CASCADE,
   FOREIGN KEY(userId) REFERENCES users(userId) ON DELETE CASCADE
 );
 
