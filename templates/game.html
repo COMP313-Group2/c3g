@@ -79,7 +79,17 @@
 			<div>
 			{% endif %}
 				<p>{{comment['userName']}} {{comment['flag']}} commented on {{comment['adate']}}:</p>
+				{% if comment['userName'] == session['user']['userName'] %}
+				<form method="post" action="/edit_comment/{{item['gameId']}}">
+					<div class="form-group">
+						<label for="comment">Comment:</label>
+						<textarea class="form-control rounded-lg text-black p-2" id="comment" name="comment" rows="2" cols="50">{{comment['acomment']}}</textarea>
+					</div>
+					<input type="submit" value="Edit Comment">
+				</form>
+				{% else %}
 				<p>{{comment['acomment']}}</p>
+				{% endif %} 
 			</div>
 			{% if comment['reply'] == 0 %}
 			<form class="grid pb-10" method="post" action="/reply/{{comment['acommentId']}}">

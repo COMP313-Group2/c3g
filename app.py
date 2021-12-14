@@ -175,9 +175,16 @@ def user_page():
                 db.commit()
                 return render_template('user.html', games=games, comments=comments, users=users)
 
+            elif session['user']['role'] == 'tech': # answer support tickets
+                tickets = query_db(f'SELECT * FROM tickets WHERE resolved = 0 AND ticketIdRef IS NULL')
+                return render_template('user.html', tickets=tickets)
+
             else: # dev sees uploaded and either public or private games
                 games = query_db(f'SELECT * FROM games WHERE status IN (0,2) AND userId = {session["user"]["userId"]}')
-                return render_template('user.html', games=games)
+                pending_tickets = query_db(f'SELECT * FROM tickets WHERE userId = {session["user"]["userId"]} AND resolved = 0')
+                closed_tickets = query_db(f'SELECT * FROM tickets WHERE ticketId IN (SELECT ticketId FROM tickets WHERE userId = {session["user"]["userId"]} AND resolved = 1) OR ticketIdRef IN (SELECT ticketId FROM tickets WHERE userId = {session["user"]["userId"]} AND resolved = 1) ORDER BY date ASC')
+
+                return render_template('user.html', games=games, pending_tickets=pending_tickets, closed_tickets=closed_tickets)
 
         elif request.method == 'POST':
             f = request.files['file']
@@ -242,12 +249,27 @@ def ticket():
     """Create a ticket to send to the tech support"""
     if 'user' in session and session['user']:
         db = get_db()
-        db.execute('INSERT INTO comments (userId, gameId, comment) VALUES (?, ?, ?)', 
-                (session['user']['userId'], game_id, request.form['comment']))
+        db.execute('INSERT INTO tickets (userId, comment) VALUES (?, ?)', 
+                (session['user']['userId'], request.form['ticket']))
         db.commit()
-        return redirect(f'/play_game/{game_id}')
+        return redirect('/user')
     else:
-        return "You must be logged in to comment on a game", 500
+        return "You must be logged in to create a ticket", 500
+
+
+@app.route("/ticket/<int:ticket_id_ref>", methods=['POST'])
+def ticket_reply(ticket_id_ref):
+    """Create a ticket to send to the tech support"""
+    if 'user' in session and session['user']:
+        db = get_db()
+        db.execute('INSERT INTO tickets (userId, comment, resolved, ticketIdRef) VALUES (?, ?, ?, ?)', 
+                (session['user']['userId'], request.form['ticket'], 1, ticket_id_ref))
+        db.execute('UPDATE tickets SET resolved = 1 WHERE ticketId = ?', (ticket_id_ref,))
+
+        db.commit()
+        return redirect('/user')
+    else:
+        return "You must be logged in to reply to a ticket", 500
 
 
 @app.route("/game/<int:game_id>")
@@ -304,6 +326,21 @@ def comment_game_api(game_id):
         return redirect(f'/play_game/{game_id}')
     else:
         return "You must be logged in to comment on a game", 500
+
+
+@app.route("/edit_comment/<int:comment_id>", methods=['POST'])
+def edit_comment_api(comment_id):
+    """Allow the user to edit comments that they have made on a particular game"""
+    if 'user' in session and session['user']:
+        db = get_db()
+        db.execute('UPDATE comments SET comment = ? where commentId = ?', 
+                (request.form['comment'], comment_id))
+        db.commit()
+        game_id = query_db(f'SELECT gameId FROM comments WHERE commentId = {comment_id}', one=True)['gameId']
+        return redirect(f'/play_game/{game_id}')
+    else:
+        return "You must be logged in to comment on a game", 500
+
 
 @app.route("/reply/<int:comment_id>", methods=['POST'])
 def reply_api(comment_id):
